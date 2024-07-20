@@ -2,17 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { useLoginUserMutation } from "@/services/userApi";
+import { login } from "@/store/authSlice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
   const router = useRouter();
+  const [loginUser] = useLoginUserMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de login, por ahora es solo un placeholder
-    console.log("Login attempt", { email, password });
-    router.push("/dashboard");
+    try {
+      const response = await loginUser({ email, password }).unwrap();
+      if (response.success) {
+        dispatch(login(response.token));
+        router.push("/dashboard");
+      } else {
+        alert("Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
   };
 
   return (
@@ -21,10 +37,10 @@ const Login = () => {
         <h2 className="text-2xl font-bold mb-6">Login</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">
+            <Label htmlFor="email" className="block text-gray-700">
               Email
-            </label>
-            <input
+            </Label>
+            <Input
               id="email"
               type="email"
               value={email}
@@ -33,10 +49,10 @@ const Login = () => {
             />
           </div>
           <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700">
+            <Label htmlFor="password" className="block text-gray-700">
               Password
-            </label>
-            <input
+            </Label>
+            <Input
               id="password"
               type="password"
               value={password}
@@ -44,12 +60,12 @@ const Login = () => {
               className="w-full px-3 py-2 border rounded"
             />
           </div>
-          <button
+          <Button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
             Login
-          </button>
+          </Button>
         </form>
       </div>
     </div>
