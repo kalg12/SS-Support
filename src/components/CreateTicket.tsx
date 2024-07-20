@@ -9,14 +9,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const CreateTicket = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [estudianteId, setEstudianteId] = useState<string>("");
+  const [descripcion, setDescripcion] = useState<string>("");
+  const [estado, setEstado] = useState<string>("open");
+  const [becarioId, setBecarioId] = useState<string>("");
+  const [horarioAgendado, setHorarioAgendado] = useState<string>("");
   const [createTicket] = useCreateTicketMutation();
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await createTicket({ title, description }).unwrap();
+      const response = await createTicket({
+        estudiante_id: parseInt(estudianteId, 10),
+        descripcion,
+        estado,
+        becario_id: parseInt(becarioId, 10),
+        horario_agendado: horarioAgendado,
+      }).unwrap();
       if (response.success) {
         Swal.fire({
           title: "Success",
@@ -24,8 +33,11 @@ const CreateTicket = () => {
           icon: "success",
           confirmButtonText: "OK",
         });
-        setTitle("");
-        setDescription("");
+        setEstudianteId("");
+        setDescripcion("");
+        setEstado("open");
+        setBecarioId("");
+        setHorarioAgendado("");
       } else {
         Swal.fire({
           title: "Error",
@@ -51,25 +63,61 @@ const CreateTicket = () => {
         <h2 className="text-2xl font-bold mb-6">Create Ticket</h2>
         <form onSubmit={handleCreateTicket}>
           <div className="mb-4">
-            <Label htmlFor="title" className="block text-gray-700">
-              Title
+            <Label htmlFor="estudiante_id" className="block text-gray-700">
+              Student ID
             </Label>
             <Input
-              id="title"
+              id="estudiante_id"
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={estudianteId}
+              onChange={(e) => setEstudianteId(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="descripcion" className="block text-gray-700">
+              Description
+            </Label>
+            <Textarea
+              id="descripcion"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="estado" className="block text-gray-700">
+              Status
+            </Label>
+            <Input
+              id="estado"
+              type="text"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="becario_id" className="block text-gray-700">
+              Scholar ID
+            </Label>
+            <Input
+              id="becario_id"
+              type="text"
+              value={becarioId}
+              onChange={(e) => setBecarioId(e.target.value)}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-6">
-            <Label htmlFor="description" className="block text-gray-700">
-              Description
+            <Label htmlFor="horario_agendado" className="block text-gray-700">
+              Scheduled Time
             </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+            <Input
+              id="horario_agendado"
+              type="datetime-local"
+              value={horarioAgendado}
+              onChange={(e) => setHorarioAgendado(e.target.value)}
               className="w-full px-3 py-2 border rounded"
             />
           </div>

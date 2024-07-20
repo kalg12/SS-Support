@@ -7,7 +7,7 @@ export const ticketApi = createApi({
     getTickets: builder.query<Ticket[], void>({
       query: () => "tickets",
     }),
-    createTicket: builder.mutation({
+    createTicket: builder.mutation<any, Partial<Ticket>>({
       query: (ticket) => ({
         url: "tickets/create",
         method: "POST",
@@ -21,7 +21,11 @@ export const { useGetTicketsQuery, useCreateTicketMutation } = ticketApi;
 
 interface Ticket {
   id: number;
-  title: string;
-  description: string;
-  status: string;
+  estudiante_id: number;
+  descripcion: string;
+  estado: string;
+  becario_id: number;
+  fecha_creacion: string;
+  fecha_actualizacion: string;
+  horario_agendado: string;
 }

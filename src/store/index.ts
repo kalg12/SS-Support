@@ -3,6 +3,7 @@ import { setupListeners } from "@reduxjs/toolkit/query/react";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { userApi } from "@/services/userApi";
+import { ticketApi } from "@/services/ticketApi";
 import authReducer from "./authSlice";
 
 const persistConfig = {
@@ -16,11 +17,12 @@ const store = configureStore({
   reducer: {
     auth: persistedReducer,
     [userApi.reducerPath]: userApi.reducer,
+    [ticketApi.reducerPath]: ticketApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(userApi.middleware),
+    }).concat(userApi.middleware, ticketApi.middleware),
 });
 
 setupListeners(store.dispatch);

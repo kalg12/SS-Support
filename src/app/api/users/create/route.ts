@@ -3,14 +3,36 @@ import bcrypt from "bcryptjs";
 import pool from "@/utils/db";
 
 export async function POST(request: NextRequest) {
-  const { email, password, name } = await request.json();
+  const {
+    nombre,
+    apellido,
+    fecha_nacimiento,
+    grupo,
+    telefono_whatsapp,
+    correo_electronico,
+    semestre,
+    foto,
+    rol_id,
+    password,
+  } = await request.json();
 
   try {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const [result]: any = await pool.query(
-      "INSERT INTO usuarios (nombre, correo_electronico, password) VALUES (?, ?, ?)",
-      [name, email, hashedPassword]
+      "INSERT INTO usuarios (nombre, apellido, fecha_nacimiento, grupo, telefono_whatsapp, correo_electronico, semestre, foto, rol_id, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        nombre,
+        apellido,
+        fecha_nacimiento,
+        grupo,
+        telefono_whatsapp,
+        correo_electronico,
+        semestre,
+        foto,
+        rol_id,
+        hashedPassword,
+      ]
     );
 
     if (result.affectedRows === 1) {
@@ -21,7 +43,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Error creating user:", error);
+
+    if (error.code === "ER_DUP_ENTRY") {
+      return NextResponse.json(
+        { success: false, message: "Email already in use" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

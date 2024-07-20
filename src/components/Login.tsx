@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { useLoginUserMutation } from "@/services/userApi";
 import { login } from "@/store/authSlice";
+import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Swal from "sweetalert2"; // Importar SweetAlert2
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -29,7 +29,7 @@ const Login = () => {
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          router.push("/dashboard");
+          router.push("/tickets");
         });
       } else {
         Swal.fire({

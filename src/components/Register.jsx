@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
 import { useRegisterUserMutation } from "@/services/userApi";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
@@ -10,17 +9,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const Register = () => {
-  const [email, setEmail] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [fecha_nacimiento, setFechaNacimiento] = useState("");
+  const [grupo, setGrupo] = useState("");
+  const [telefono_whatsapp, setTelefonoWhatsapp] = useState("");
+  const [correo_electronico, setCorreoElectronico] = useState("");
+  const [semestre, setSemestre] = useState("");
+  const [foto, setFoto] = useState("");
+  const [rol_id, setRolId] = useState(1);
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const dispatch = useDispatch();
   const router = useRouter();
   const [registerUser] = useRegisterUserMutation();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await registerUser({ email, password, name }).unwrap();
+      const response = await registerUser({
+        nombre,
+        apellido,
+        fecha_nacimiento,
+        grupo,
+        telefono_whatsapp,
+        correo_electronico,
+        semestre,
+        foto,
+        rol_id,
+        password,
+      }).unwrap();
       if (response.success) {
         Swal.fire({
           title: "Success",
@@ -55,26 +71,98 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-6">Register</h2>
         <form onSubmit={handleRegister}>
           <div className="mb-4">
-            <Label htmlFor="name" className="block text-gray-700">
+            <Label htmlFor="nombre" className="block text-gray-700">
               Name
             </Label>
             <Input
-              id="name"
+              id="nombre"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
-            <Label htmlFor="email" className="block text-gray-700">
+            <Label htmlFor="apellido" className="block text-gray-700">
+              Last Name
+            </Label>
+            <Input
+              id="apellido"
+              type="text"
+              value={apellido}
+              onChange={(e) => setApellido(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="fecha_nacimiento" className="block text-gray-700">
+              Birth Date
+            </Label>
+            <Input
+              id="fecha_nacimiento"
+              type="date"
+              value={fecha_nacimiento}
+              onChange={(e) => setFechaNacimiento(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="grupo" className="block text-gray-700">
+              Group
+            </Label>
+            <Input
+              id="grupo"
+              type="text"
+              value={grupo}
+              onChange={(e) => setGrupo(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
+              WhatsApp Phone
+            </Label>
+            <Input
+              id="telefono_whatsapp"
+              type="text"
+              value={telefono_whatsapp}
+              onChange={(e) => setTelefonoWhatsapp(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="correo_electronico" className="block text-gray-700">
               Email
             </Label>
             <Input
-              id="email"
+              id="correo_electronico"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={correo_electronico}
+              onChange={(e) => setCorreoElectronico(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="semestre" className="block text-gray-700">
+              Semester
+            </Label>
+            <Input
+              id="semestre"
+              type="text"
+              value={semestre}
+              onChange={(e) => setSemestre(e.target.value)}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="foto" className="block text-gray-700">
+              Photo URL
+            </Label>
+            <Input
+              id="foto"
+              type="text"
+              value={foto}
+              onChange={(e) => setFoto(e.target.value)}
               className="w-full px-3 py-2 border rounded"
             />
           </div>

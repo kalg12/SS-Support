@@ -8,9 +8,13 @@ import { Button } from "@/components/ui/button";
 
 interface Ticket {
   id: number;
-  title: string;
-  description: string;
-  status: string;
+  estudiante_id: number;
+  descripcion: string;
+  estado: string;
+  becario_id: number;
+  fecha_creacion: string;
+  fecha_actualizacion: string;
+  horario_agendado: string;
 }
 
 const TicketList = () => {
@@ -18,7 +22,8 @@ const TicketList = () => {
     data: tickets = [],
     error,
     isLoading,
-  } = useGetTicketsQuery(undefined);
+  } = useGetTicketsQuery(undefined); // Asegúrate de pasar 'undefined' si no hay argumentos
+
   const dispatch = useDispatch();
 
   const handleLogout = () => {
@@ -49,9 +54,13 @@ const TicketList = () => {
         {tickets.map((ticket: Ticket) => (
           <li key={ticket.id} className="mb-2">
             <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-bold">{ticket.title}</h2>
-              <p>{ticket.description}</p>
-              <p>Status: {ticket.status}</p>
+              <h2 className="text-xl font-bold">Ticket {ticket.id}</h2>
+              <p>{ticket.descripcion}</p>
+              <p>Status: {ticket.estado}</p>
+              <p>
+                Scheduled Time:{" "}
+                {new Date(ticket.horario_agendado).toLocaleString()}
+              </p>
             </div>
           </li>
         ))}

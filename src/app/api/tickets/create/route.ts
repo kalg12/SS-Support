@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
 
 export async function POST(request: NextRequest) {
-  const { title, description } = await request.json();
+  const { estudiante_id, descripcion, estado, becario_id, horario_agendado } =
+    await request.json();
 
   try {
     const [result]: any = await pool.query(
-      "INSERT INTO tickets (title, description, status) VALUES (?, ?, ?)",
-      [title, description, "open"]
+      "INSERT INTO tickets (estudiante_id, descripcion, estado, becario_id, horario_agendado) VALUES (?, ?, ?, ?, ?)",
+      [estudiante_id, descripcion, estado, becario_id, horario_agendado]
     );
 
     if (result.affectedRows === 1) {
