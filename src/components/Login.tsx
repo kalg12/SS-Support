@@ -30,9 +30,7 @@ const Login = () => {
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          router.push(
-            rol === "superadmin" || rol === "admin" ? "/register" : "/tickets"
-          );
+          router.push("/dashboard");
         });
       } else {
         Swal.fire({
