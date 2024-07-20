@@ -3,24 +3,27 @@ import bcrypt from "bcryptjs";
 import pool from "@/utils/db";
 
 export async function POST(request: NextRequest) {
-  const { nombre, apellido, correo_electronico, password, rol_id } =
-    await request.json();
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const { email, password, name } = await request.json();
 
   try {
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
     const [result]: any = await pool.query(
-      "INSERT INTO usuarios (nombre, apellido, correo_electronico, password, rol_id) VALUES (?, ?, ?, ?, ?)",
-      [nombre, apellido, correo_electronico, hashedPassword, rol_id]
+      "INSERT INTO usuarios (nombre, correo_electronico, password) VALUES (?, ?, ?)",
+      [name, email, hashedPassword]
     );
 
-    return NextResponse.json({ success: true, userId: result.insertId });
+    if (result.affectedRows === 1) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { success: false, message: "User creation failed" },
+        { status: 400 }
+      );
+    }
   } catch (error) {
     return NextResponse.json(
-      {
-        success: false,
-        message: "Internal server error",
-        error: (error as Error).message,
-      },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     );
   }
