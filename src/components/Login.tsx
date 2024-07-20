@@ -22,14 +22,17 @@ const Login = () => {
     try {
       const response = await loginUser({ email, password }).unwrap();
       if (response.success) {
-        dispatch(login(response.token));
+        const { token, rol } = response;
+        dispatch(login({ token, role: rol }));
         Swal.fire({
           title: "Success",
           text: "Login successful!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          router.push("/tickets");
+          router.push(
+            rol === "superadmin" || rol === "admin" ? "/register" : "/tickets"
+          );
         });
       } else {
         Swal.fire({

@@ -1,8 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import pool from "@/utils/db";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "app_service_social_ultras3cre3t";
 
 export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader) {
+    return NextResponse.json(
+      { success: false, message: "No autorizado" },
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const { rol } = decoded;
+
+    if (rol !== "superadmin" && rol !== "admin") {
+      return NextResponse.json(
+        { success: false, message: "Acceso denegado" },
+        { status: 403 }
+      );
+    }
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: "Token inválido o expirado" },
+      { status: 401 }
+    );
+  }
+
   const {
     nombre,
     apellido,
@@ -39,22 +69,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { success: false, message: "User creation failed" },
+        { success: false, message: "Error en la creación del usuario" },
         { status: 400 }
       );
     }
   } catch (error: any) {
-    console.error("Error creating user:", error);
+    console.error("Error creando usuario:", error);
 
     if (error.code === "ER_DUP_ENTRY") {
       return NextResponse.json(
-        { success: false, message: "Email already in use" },
+        { success: false, message: "Correo electrónico ya en uso" },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "Error interno del servidor" },
       { status: 500 }
     );
   }

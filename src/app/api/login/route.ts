@@ -10,25 +10,32 @@ export async function POST(request: NextRequest) {
 
   try {
     const [rows]: any = await pool.query(
-      "SELECT * FROM usuarios WHERE correo_electronico = ?",
+      `SELECT u.*, r.nombre AS rol_nombre 
+       FROM usuarios u 
+       JOIN roles r ON u.rol_id = r.id 
+       WHERE correo_electronico = ?`,
       [email]
     );
     const user = rows[0];
 
     if (user && bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ id: user.id, rol: user.rol }, JWT_SECRET, {
-        expiresIn: "1h",
-      });
-      return NextResponse.json({ success: true, token });
+      const token = jwt.sign(
+        { id: user.id, rol: user.rol_nombre },
+        JWT_SECRET,
+        {
+          expiresIn: "1h",
+        }
+      );
+      return NextResponse.json({ success: true, token, rol: user.rol_nombre });
     } else {
       return NextResponse.json(
-        { success: false, message: "Invalid credentials" },
+        { success: false, message: "Credenciales inválidas" },
         { status: 401 }
       );
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "Error interno del servidor" },
       { status: 500 }
     );
   }
