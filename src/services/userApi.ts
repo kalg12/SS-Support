@@ -1,6 +1,8 @@
-import { api } from "./api";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const userApi = api.injectEndpoints({
+export const userApi = createApi({
+  reducerPath: "userApi",
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (credentials) => ({
@@ -9,10 +11,14 @@ export const userApi = api.injectEndpoints({
         body: credentials,
       }),
     }),
-    getUsers: builder.query({
-      query: () => "users",
+    createUser: builder.mutation({
+      query: (user) => ({
+        url: "users/create",
+        method: "POST",
+        body: user,
+      }),
     }),
   }),
 });
 
-export const { useLoginUserMutation, useGetUsersQuery } = userApi;
+export const { useLoginUserMutation, useCreateUserMutation } = userApi;
