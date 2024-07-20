@@ -8,6 +8,7 @@ import { login } from "@/store/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Swal from "sweetalert2"; // Importar SweetAlert2
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -22,12 +23,30 @@ const Login = () => {
       const response = await loginUser({ email, password }).unwrap();
       if (response.success) {
         dispatch(login(response.token));
-        router.push("/dashboard");
+        Swal.fire({
+          title: "Success",
+          text: "Login successful!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          router.push("/dashboard");
+        });
       } else {
-        alert("Invalid credentials");
+        Swal.fire({
+          title: "Error",
+          text: "Invalid credentials",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
     } catch (error) {
       console.error("Error logging in:", error);
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred during login",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
     }
   };
 
