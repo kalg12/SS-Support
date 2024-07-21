@@ -2,60 +2,80 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
 import { useRegisterUserMutation } from "@/services/userApi";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { selectToken } from "@/store/authSlice"; // Importa el selector selectToken
 
-const Register = () => {
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [fecha_nacimiento, setFechaNacimiento] = useState("");
-  const [grupo, setGrupo] = useState("");
-  const [telefono_whatsapp, setTelefonoWhatsapp] = useState("");
-  const [correo_electronico, setCorreoElectronico] = useState("");
-  const [semestre, setSemestre] = useState("");
-  const [foto, setFoto] = useState("");
-  const [rol_id, setRolId] = useState(1);
-  const [password, setPassword] = useState("");
+const grupos = [
+  "Mecánica Naval",
+  "Refrigeración",
+  "Químico Biólogo",
+  "Alimentos y Bebidas",
+  "Recreaciones Acuáticas",
+  "Acuacultura",
+];
+
+const semestres = [1, 2, 3, 4, 5, 6];
+
+const roles = [
+  { id: 1, nombre: "Superadmin" },
+  { id: 2, nombre: "Admin" },
+  { id: 3, nombre: "Becario" },
+  { id: 4, nombre: "Estudiante" },
+];
+
+const RegisterUser = () => {
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    fecha_nacimiento: "",
+    grupo: grupos[0],
+    telefono_whatsapp: "",
+    correo_electronico: "",
+    semestre: semestres[0],
+    foto: null,
+    rol_id: roles[0].id,
+    password: "",
+  });
+
   const router = useRouter();
   const [registerUser] = useRegisterUserMutation();
+  const token = useSelector(selectToken);
 
-  const handleRegister = async (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await registerUser({
-        nombre,
-        apellido,
-        fecha_nacimiento,
-        grupo,
-        telefono_whatsapp,
-        correo_electronico,
-        semestre,
-        foto,
-        rol_id,
-        password,
-      }).unwrap();
+      const response = await registerUser({ formData, token }).unwrap();
       if (response.success) {
         Swal.fire({
           title: "Success",
-          text: "Registration successful!",
+          text: "User registered successfully!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          router.push("/login");
+          router.push("/dashboard");
         });
       } else {
         Swal.fire({
           title: "Error",
-          text: response.message,
+          text: "User registration failed",
           icon: "error",
           confirmButtonText: "OK",
         });
       }
     } catch (error) {
-      console.error("Error registering:", error);
+      console.error("Error registering user:", error);
       Swal.fire({
         title: "Error",
         text: "An error occurred during registration",
@@ -68,40 +88,44 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <form onSubmit={handleRegister}>
+        <h2 className="text-2xl font-bold mb-6">Register User</h2>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <Label htmlFor="nombre" className="block text-gray-700">
               Nombre
             </Label>
             <Input
               id="nombre"
+              name="nombre"
               type="text"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              value={formData.nombre}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
             <Label htmlFor="apellido" className="block text-gray-700">
-              Apellidos
+              Apellido
             </Label>
             <Input
               id="apellido"
+              name="apellido"
               type="text"
-              value={apellido}
-              onChange={(e) => setApellido(e.target.value)}
+              value={formData.apellido}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
             <Label htmlFor="fecha_nacimiento" className="block text-gray-700">
-              Fecha de nacimiento
+              Fecha de Nacimiento
             </Label>
             <Input
               id="fecha_nacimiento"
+              name="fecha_nacimiento"
               type="date"
-              value={fecha_nacimiento}
-              onChange={(e) => setFechaNacimiento(e.target.value)}
+              value={formData.fecha_nacimiento}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
@@ -109,13 +133,19 @@ const Register = () => {
             <Label htmlFor="grupo" className="block text-gray-700">
               Grupo
             </Label>
-            <Input
+            <select
               id="grupo"
-              type="text"
-              value={grupo}
-              onChange={(e) => setGrupo(e.target.value)}
+              name="grupo"
+              value={formData.grupo}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
-            />
+            >
+              {grupos.map((grupo) => (
+                <option key={grupo} value={grupo}>
+                  {grupo}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="mb-4">
             <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
@@ -123,21 +153,23 @@ const Register = () => {
             </Label>
             <Input
               id="telefono_whatsapp"
+              name="telefono_whatsapp"
               type="text"
-              value={telefono_whatsapp}
-              onChange={(e) => setTelefonoWhatsapp(e.target.value)}
+              value={formData.telefono_whatsapp}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
             <Label htmlFor="correo_electronico" className="block text-gray-700">
-              Correo electrónico
+              Correo Electrónico
             </Label>
             <Input
               id="correo_electronico"
+              name="correo_electronico"
               type="email"
-              value={correo_electronico}
-              onChange={(e) => setCorreoElectronico(e.target.value)}
+              value={formData.correo_electronico}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
@@ -145,25 +177,37 @@ const Register = () => {
             <Label htmlFor="semestre" className="block text-gray-700">
               Semestre
             </Label>
-            <Input
+            <select
               id="semestre"
-              type="text"
-              value={semestre}
-              onChange={(e) => setSemestre(e.target.value)}
+              name="semestre"
+              value={formData.semestre}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
-            />
+            >
+              {semestres.map((semestre) => (
+                <option key={semestre} value={semestre}>
+                  {semestre}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="mb-4">
-            <Label htmlFor="foto" className="block text-gray-700">
-              Fotografía
+            <Label htmlFor="rol_id" className="block text-gray-700">
+              Rol
             </Label>
-            <Input
-              id="foto"
-              type="text"
-              value={foto}
-              onChange={(e) => setFoto(e.target.value)}
+            <select
+              id="rol_id"
+              name="rol_id"
+              value={formData.rol_id}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
-            />
+            >
+              {roles.map((rol) => (
+                <option key={rol.id} value={rol.id}>
+                  {rol.nombre}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="mb-6">
             <Label htmlFor="password" className="block text-gray-700">
@@ -171,9 +215,10 @@ const Register = () => {
             </Label>
             <Input
               id="password"
+              name="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
@@ -181,7 +226,7 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Crear usuario
+            Registrar Usuario
           </Button>
         </form>
       </div>
@@ -189,4 +234,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterUser;

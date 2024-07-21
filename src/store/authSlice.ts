@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "./index";
 
-interface AuthState {
+export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   role: string | null;
@@ -59,5 +59,6 @@ export const selectRole = (state: RootState) => state.auth.role;
 export const selectNombre = (state: RootState) => state.auth.nombre;
 export const selectApellido = (state: RootState) => state.auth.apellido;
 export const selectFoto = (state: RootState) => state.auth.foto;
+export const selectToken = (state: RootState) => state.auth.token;
 
 export default authSlice.reducer;
