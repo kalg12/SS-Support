@@ -68,11 +68,10 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Register</h2>
         <form onSubmit={handleRegister}>
           <div className="mb-4">
             <Label htmlFor="nombre" className="block text-gray-700">
-              Name
+              Nombre
             </Label>
             <Input
               id="nombre"
@@ -84,7 +83,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="apellido" className="block text-gray-700">
-              Last Name
+              Apellidos
             </Label>
             <Input
               id="apellido"
@@ -96,7 +95,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="fecha_nacimiento" className="block text-gray-700">
-              Birth Date
+              Fecha de nacimiento
             </Label>
             <Input
               id="fecha_nacimiento"
@@ -108,7 +107,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="grupo" className="block text-gray-700">
-              Group
+              Grupo
             </Label>
             <Input
               id="grupo"
@@ -120,7 +119,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
-              WhatsApp Phone
+              Teléfono WhatsApp
             </Label>
             <Input
               id="telefono_whatsapp"
@@ -132,7 +131,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="correo_electronico" className="block text-gray-700">
-              Email
+              Correo electrónico
             </Label>
             <Input
               id="correo_electronico"
@@ -144,7 +143,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="semestre" className="block text-gray-700">
-              Semester
+              Semestre
             </Label>
             <Input
               id="semestre"
@@ -156,7 +155,7 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <Label htmlFor="foto" className="block text-gray-700">
-              Photo URL
+              Fotografía
             </Label>
             <Input
               id="foto"
@@ -168,7 +167,7 @@ const Register = () => {
           </div>
           <div className="mb-6">
             <Label htmlFor="password" className="block text-gray-700">
-              Password
+              Contraseña
             </Label>
             <Input
               id="password"
@@ -182,7 +181,7 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Register
+            Crear usuario
           </Button>
         </form>
       </div>

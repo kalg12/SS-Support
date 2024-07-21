@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -24,6 +25,7 @@ const Login = () => {
       if (response.success) {
         const { token, rol } = response;
         dispatch(login({ token, role: rol }));
+        Cookies.set("token", token, { expires: 1 }); // Guarda el token en las cookies por 1 día
         Swal.fire({
           title: "Success",
           text: "Login successful!",

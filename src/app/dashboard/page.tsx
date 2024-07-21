@@ -1,25 +1,29 @@
 "use client";
 
-import { useDispatch } from "react-redux";
-import { logout } from "@/store/authSlice";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "@/store/authSlice";
+import DashboardLayout from "@/components/DashboardLayout";
 
 export default function Dashboard() {
-  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
   const router = useRouter();
 
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/");
-  };
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <Button onClick={handleLogout} className="bg-red-500 text-white">
-        Cerrar Sesión
-      </Button>
-    </div>
+    <DashboardLayout>
+      <h1 className="text-3xl font-bold mb-6">Dashboard Content</h1>
+      <p>Welcome to the dashboard!</p>
+    </DashboardLayout>
   );
 }
