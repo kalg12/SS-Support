@@ -1,70 +1,78 @@
 "use client";
 
-import { useGetTicketsQuery } from "@/services/ticketApi";
-import { useDispatch } from "react-redux";
-import { logout } from "@/store/authSlice";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 
 interface Ticket {
   id: number;
-  estudiante_id: number;
+  nombre: string;
+  apellido: string;
+  grupo: string;
+  semestre: number;
+  telefono_whatsapp: string;
   descripcion: string;
   estado: string;
-  becario_id: number;
   fecha_creacion: string;
-  fecha_actualizacion: string;
-  horario_agendado: string;
+  fecha_actualizacion?: string;
+  horario_agendado?: string;
 }
 
 const TicketList = () => {
-  const {
-    data: tickets = [],
-    error,
-    isLoading,
-  } = useGetTicketsQuery(undefined); // Asegúrate de pasar 'undefined' si no hay argumentos
+  const [tickets, setTickets] = useState<Ticket[]>([]);
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch("/api/tickets/list");
+        const data = await response.json();
 
-  const handleLogout = () => {
-    dispatch(logout());
-    Swal.fire({
-      title: "Logged Out",
-      text: "You have been logged out successfully.",
-      icon: "success",
-      confirmButtonText: "OK",
-    });
-  };
+        if (data.success) {
+          setTickets(data.tickets);
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+        Swal.fire({
+          title: "Error",
+          text: "An error occurred while fetching the tickets",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading tickets</div>;
-  }
+    fetchTickets();
+  }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Ticket List</h1>
-      <Button onClick={handleLogout} className="mb-4">
-        Logout
-      </Button>
-      <ul>
-        {tickets.map((ticket: Ticket) => (
-          <li key={ticket.id} className="mb-2">
-            <div className="bg-white p-4 rounded shadow">
-              <h2 className="text-xl font-bold">Ticket {ticket.id}</h2>
-              <p>{ticket.descripcion}</p>
-              <p>Status: {ticket.estado}</p>
-              <p>
-                Scheduled Time:{" "}
-                {new Date(ticket.horario_agendado).toLocaleString()}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-4xl">
+        <h2 className="text-2xl font-bold mb-6">Tickets</h2>
+        <ul className="space-y-4">
+          {tickets.map((ticket) => (
+            <li key={ticket.id} className="p-4 bg-gray-200 rounded shadow">
+              <p className="text-lg font-bold">
+                {ticket.nombre} {ticket.apellido}
               </p>
-            </div>
-          </li>
-        ))}
-      </ul>
+              <p className="text-sm">
+                {ticket.grupo} - Semestre {ticket.semestre}
+              </p>
+              <p className="text-sm">{ticket.telefono_whatsapp}</p>
+              <p className="text-sm">{ticket.descripcion}</p>
+              <p className="text-sm text-gray-500">
+                {new Date(ticket.fecha_creacion).toLocaleString()}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

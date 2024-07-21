@@ -1,47 +1,72 @@
 "use client";
 
 import { useState } from "react";
-import { useCreateTicketMutation } from "@/services/ticketApi";
+import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
+const grupos = [
+  "Mecánica Naval",
+  "Refrigeración",
+  "Químico Biólogo",
+  "Alimentos y Bebidas",
+  "Recreaciones Acuáticas",
+  "Acuacultura",
+];
+
+const semestres = [1, 2, 3, 4, 5, 6];
 
 const CreateTicket = () => {
-  const [estudianteId, setEstudianteId] = useState<string>("");
-  const [descripcion, setDescripcion] = useState<string>("");
-  const [estado, setEstado] = useState<string>("open");
-  const [becarioId, setBecarioId] = useState<string>("");
-  const [horarioAgendado, setHorarioAgendado] = useState<string>("");
-  const [createTicket] = useCreateTicketMutation();
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    grupo: grupos[0],
+    semestre: semestres[0],
+    telefono_whatsapp: "",
+    descripcion: "",
+    horario_agendado: "",
+  });
 
-  const handleCreateTicket = async (e: React.FormEvent) => {
+  const router = useRouter();
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await createTicket({
-        estudiante_id: parseInt(estudianteId, 10),
-        descripcion,
-        estado,
-        becario_id: parseInt(becarioId, 10),
-        horario_agendado: horarioAgendado,
-      }).unwrap();
-      if (response.success) {
+      const response = await fetch("/api/tickets/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+
+      if (data.success) {
         Swal.fire({
           title: "Success",
           text: "Ticket created successfully!",
           icon: "success",
           confirmButtonText: "OK",
+        }).then(() => {
+          router.push("/"); // Redirige a la página principal o a donde desees
         });
-        setEstudianteId("");
-        setDescripcion("");
-        setEstado("open");
-        setBecarioId("");
-        setHorarioAgendado("");
       } else {
         Swal.fire({
           title: "Error",
-          text: response.message,
+          text: data.message,
           icon: "error",
           confirmButtonText: "OK",
         });
@@ -61,63 +86,104 @@ const CreateTicket = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6">Create Ticket</h2>
-        <form onSubmit={handleCreateTicket}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <Label htmlFor="estudiante_id" className="block text-gray-700">
-              Student ID
+            <Label htmlFor="nombre" className="block text-gray-700">
+              Nombre
             </Label>
             <Input
-              id="estudiante_id"
+              id="nombre"
+              name="nombre"
               type="text"
-              value={estudianteId}
-              onChange={(e) => setEstudianteId(e.target.value)}
+              value={formData.nombre}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
-            <Label htmlFor="descripcion" className="block text-gray-700">
-              Description
+            <Label htmlFor="apellido" className="block text-gray-700">
+              Apellido
             </Label>
-            <Textarea
-              id="descripcion"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
+            <Input
+              id="apellido"
+              name="apellido"
+              type="text"
+              value={formData.apellido}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-4">
-            <Label htmlFor="estado" className="block text-gray-700">
-              Status
+            <Label htmlFor="grupo" className="block text-gray-700">
+              Grupo
             </Label>
-            <Input
-              id="estado"
-              type="text"
-              value={estado}
-              onChange={(e) => setEstado(e.target.value)}
+            <select
+              id="grupo"
+              name="grupo"
+              value={formData.grupo}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
-            />
+            >
+              {grupos.map((grupo) => (
+                <option key={grupo} value={grupo}>
+                  {grupo}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="mb-4">
-            <Label htmlFor="becario_id" className="block text-gray-700">
-              Scholar ID
+            <Label htmlFor="semestre" className="block text-gray-700">
+              Semestre
+            </Label>
+            <select
+              id="semestre"
+              name="semestre"
+              value={formData.semestre}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+            >
+              {semestres.map((semestre) => (
+                <option key={semestre} value={semestre}>
+                  {semestre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
+              Teléfono WhatsApp
             </Label>
             <Input
-              id="becario_id"
+              id="telefono_whatsapp"
+              name="telefono_whatsapp"
               type="text"
-              value={becarioId}
-              onChange={(e) => setBecarioId(e.target.value)}
+              value={formData.telefono_whatsapp}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div className="mb-6">
+            <Label htmlFor="descripcion" className="block text-gray-700">
+              Descripción
+            </Label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+            ></textarea>
+          </div>
+          <div className="mb-4">
             <Label htmlFor="horario_agendado" className="block text-gray-700">
-              Scheduled Time
+              Horario Agendado
             </Label>
             <Input
               id="horario_agendado"
+              name="horario_agendado"
               type="datetime-local"
-              value={horarioAgendado}
-              onChange={(e) => setHorarioAgendado(e.target.value)}
+              value={formData.horario_agendado}
+              onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
             />
           </div>
@@ -125,7 +191,7 @@ const CreateTicket = () => {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Create Ticket
+            Crear Ticket
           </Button>
         </form>
       </div>

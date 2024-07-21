@@ -21,7 +21,7 @@ const Sidebar = () => {
           <FaUserPlus className="mr-2" /> Agregar Usuario
         </Link>
         <Link
-          href="/tickets"
+          href="/dashboard/tickets"
           className="flex items-center py-2.5 px-4 text-white hover:bg-gray-700 transition duration-200"
         >
           <FaTicketAlt className="mr-2" /> Tickets
