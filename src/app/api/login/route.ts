@@ -26,7 +26,14 @@ export async function POST(request: NextRequest) {
           expiresIn: "1h",
         }
       );
-      return NextResponse.json({ success: true, token, rol: user.rol_nombre });
+      return NextResponse.json({
+        success: true,
+        token,
+        rol: user.rol_nombre,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        foto: user.foto,
+      });
     } else {
       return NextResponse.json(
         { success: false, message: "Credenciales inválidas" },
