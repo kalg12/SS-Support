@@ -2,24 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useSelector } from "react-redux";
+import { selectToken } from "@/store/authSlice";
 import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter,
-  TableCaption,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Ticket {
   id: number;
@@ -37,6 +31,7 @@ interface Ticket {
 
 const TicketList = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const token = useSelector(selectToken);
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -68,26 +63,28 @@ const TicketList = () => {
     fetchTickets();
   }, []);
 
-  const handleStatusChange = async (ticketId: number, newStatus: string) => {
+  const handleStatusChange = async (id: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/tickets/${ticketId}`, {
+      const response = await fetch(`/api/tickets/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ estado: newStatus }),
       });
+
       const data = await response.json();
 
       if (data.success) {
         setTickets((prevTickets) =>
           prevTickets.map((ticket) =>
-            ticket.id === ticketId ? { ...ticket, estado: newStatus } : ticket
+            ticket.id === id ? { ...ticket, estado: newStatus } : ticket
           )
         );
         Swal.fire({
           title: "Success",
-          text: "Ticket status updated successfully!",
+          text: "Ticket updated successfully!",
           icon: "success",
           confirmButtonText: "OK",
         });
@@ -100,10 +97,10 @@ const TicketList = () => {
         });
       }
     } catch (error) {
-      console.error("Error updating ticket status:", error);
+      console.error("Error updating ticket:", error);
       Swal.fire({
         title: "Error",
-        text: "An error occurred while updating the ticket status",
+        text: "An error occurred while updating the ticket",
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -112,22 +109,20 @@ const TicketList = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-4xl">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-6xl">
         <h2 className="text-2xl font-bold mb-6">Tickets</h2>
         <Table>
-          <TableCaption>Lista de tickets de soporte</TableCaption>
+          <TableCaption>Lista de tickets de soporte.</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
               <TableHead>Nombre</TableHead>
-              <TableHead>Apellido</TableHead>
               <TableHead>Grupo</TableHead>
               <TableHead>Semestre</TableHead>
               <TableHead>Teléfono</TableHead>
               <TableHead>Descripción</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Creación</TableHead>
-              <TableHead>Actualización</TableHead>
+              <TableHead>Fecha Creación</TableHead>
               <TableHead>Horario Agendado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
@@ -136,36 +131,16 @@ const TicketList = () => {
             {tickets.map((ticket) => (
               <TableRow key={ticket.id}>
                 <TableCell>{ticket.id}</TableCell>
-                <TableCell>{ticket.nombre}</TableCell>
-                <TableCell>{ticket.apellido}</TableCell>
+                <TableCell>
+                  {ticket.nombre} {ticket.apellido}
+                </TableCell>
                 <TableCell>{ticket.grupo}</TableCell>
                 <TableCell>{ticket.semestre}</TableCell>
                 <TableCell>{ticket.telefono_whatsapp}</TableCell>
                 <TableCell>{ticket.descripcion}</TableCell>
-                <TableCell>
-                  <Select
-                    onValueChange={(value) =>
-                      handleStatusChange(ticket.id, value)
-                    }
-                    defaultValue={ticket.estado}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="en proceso">En Proceso</SelectItem>
-                      <SelectItem value="resuelto">Resuelto</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
+                <TableCell>{ticket.estado}</TableCell>
                 <TableCell>
                   {new Date(ticket.fecha_creacion).toLocaleString()}
-                </TableCell>
-                <TableCell>
-                  {ticket.fecha_actualizacion
-                    ? new Date(ticket.fecha_actualizacion).toLocaleString()
-                    : "N/A"}
                 </TableCell>
                 <TableCell>
                   {ticket.horario_agendado
@@ -173,22 +148,22 @@ const TicketList = () => {
                     : "N/A"}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => handleStatusChange(ticket.id, "resuelto")}
+                  <select
+                    value={ticket.estado}
+                    onChange={(e) =>
+                      handleStatusChange(ticket.id, e.target.value)
+                    }
+                    className="form-select"
                   >
-                    Marcar como Resuelto
-                  </Button>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Proceso">En Proceso</option>
+                    <option value="Resuelto">Resuelto</option>
+                    <option value="Cerrado">Cerrado</option>
+                  </select>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={12}>
-                Total: {tickets.length} tickets
-              </TableCell>
-            </TableRow>
-          </TableFooter>
         </Table>
       </div>
     </div>
