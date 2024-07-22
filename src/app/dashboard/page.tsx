@@ -22,8 +22,8 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold mb-6">Dashboard Content</h1>
-      <p>Welcome to the dashboard!</p>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <p>En esta sección encontrarás un resumen de actividades</p>
     </DashboardLayout>
   );
 }

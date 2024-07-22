@@ -104,7 +104,6 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Register User</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <Label htmlFor="nombre" className="block text-gray-700">
@@ -116,7 +115,7 @@ const Register = () => {
               type="text"
               value={formData.nombre}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
@@ -129,7 +128,7 @@ const Register = () => {
               type="text"
               value={formData.apellido}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
@@ -142,7 +141,7 @@ const Register = () => {
               type="date"
               value={formData.fecha_nacimiento}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
@@ -154,7 +153,7 @@ const Register = () => {
               name="grupo"
               value={formData.grupo}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             >
               {grupos.map((grupo) => (
                 <option key={grupo} value={grupo}>
@@ -172,7 +171,7 @@ const Register = () => {
               name="semestre"
               value={formData.semestre}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             >
               {semestres.map((semestre) => (
                 <option key={semestre} value={semestre}>
@@ -191,7 +190,7 @@ const Register = () => {
               type="text"
               value={formData.telefono_whatsapp}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
@@ -204,12 +203,12 @@ const Register = () => {
               type="email"
               value={formData.correo_electronico}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
             <Label htmlFor="password" className="block text-gray-700">
-              Password
+              Contraseña
             </Label>
             <Input
               id="password"
@@ -217,7 +216,7 @@ const Register = () => {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             />
           </div>
           <div className="mb-4">
@@ -229,7 +228,7 @@ const Register = () => {
               name="rol_id"
               value={formData.rol_id}
               onChange={handleRoleChange}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border rounded mt-2"
             >
               {roles.map((rol) => (
                 <option key={rol.id} value={rol.id}>
@@ -278,7 +277,7 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Register
+            Registrar
           </Button>
         </form>
       </div>
