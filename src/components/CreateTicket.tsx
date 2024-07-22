@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 
 const grupos = [
   "Mecánica Naval",
@@ -39,6 +40,13 @@ const CreateTicket = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSelectSlot = (date: Date, time: string) => {
+    setFormData({
+      ...formData,
+      horario_agendado: `${date.toISOString().split("T")[0]} ${time}`,
     });
   };
 
@@ -178,14 +186,10 @@ const CreateTicket = () => {
             <Label htmlFor="horario_agendado" className="block text-gray-700">
               Horario Agendado
             </Label>
-            <Input
-              id="horario_agendado"
-              name="horario_agendado"
-              type="datetime-local"
-              value={formData.horario_agendado}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
-            />
+            <AvailabilityCalendar onSelectSlot={handleSelectSlot} />
+            <p className="mt-2 text-gray-600">
+              Selected Slot: {formData.horario_agendado}
+            </p>
           </div>
           <Button
             type="submit"
