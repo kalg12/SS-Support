@@ -37,27 +37,18 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    if (result.affectedRows === 1) {
-      const userId = result.insertId;
+    const userId = result.insertId;
 
-      // Si el rol es becario, insertar en la tabla becarios
-      if (rol_id === 3) {
-        // Asegúrate de que 3 es el ID para el rol becario
-        await pool.query(
-          "INSERT INTO becarios (usuario_id, fecha_inicio_servicio, fecha_fin_servicio) VALUES (?, ?, ?)",
-          [userId, fecha_inicio_servicio, fecha_fin_servicio]
-        );
-      }
-
-      return NextResponse.json({ success: true });
-    } else {
-      return NextResponse.json(
-        { success: false, message: "User creation failed" },
-        { status: 400 }
+    if (rol_id === 3 && fecha_inicio_servicio && fecha_fin_servicio) {
+      await pool.query(
+        "INSERT INTO becarios (usuario_id, fecha_inicio_servicio, fecha_fin_servicio) VALUES (?, ?, ?)",
+        [userId, fecha_inicio_servicio, fecha_fin_servicio]
       );
     }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating user:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

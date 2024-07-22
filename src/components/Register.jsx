@@ -49,6 +49,17 @@ const Register = () => {
     });
   };
 
+  const handleRoleChange = (e) => {
+    const newRole = parseInt(e.target.value);
+    setFormData({
+      ...formData,
+      rol_id: newRole,
+      fecha_inicio_servicio:
+        newRole === 3 ? formData.fecha_inicio_servicio : "",
+      fecha_fin_servicio: newRole === 3 ? formData.fecha_fin_servicio : "",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -217,7 +228,7 @@ const Register = () => {
               id="rol_id"
               name="rol_id"
               value={formData.rol_id}
-              onChange={handleChange}
+              onChange={handleRoleChange}
               className="w-full px-3 py-2 border rounded"
             >
               {roles.map((rol) => (
