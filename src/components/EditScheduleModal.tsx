@@ -6,6 +6,8 @@ import Modal from "@/components/ui/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
+import { useSelector } from "react-redux";
+import { selectToken } from "@/store/authSlice";
 
 interface Schedule {
   id: number;
@@ -39,6 +41,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
     parseTimeString(schedule.hora_fin)
   );
 
+  const token = useSelector(selectToken);
+
   const handleSave = async () => {
     if (!startTime || !endTime) {
       Swal.fire("Error", "Debe seleccionar una hora de inicio y fin.", "error");
@@ -47,12 +51,11 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
 
     const updatedSchedule = {
       ...schedule,
-      hora_inicio: startTime.toTimeString().substring(0, 5),
-      hora_fin: endTime.toTimeString().substring(0, 5),
+      hora_inicio: startTime.toISOString().substring(11, 16),
+      hora_fin: endTime.toISOString().substring(11, 16),
     };
 
     try {
-      const token = localStorage.getItem("token");
       const response = await fetch(`/api/horarios/fixed/${schedule.id}`, {
         method: "PATCH",
         headers: {
@@ -87,8 +90,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
             timeIntervals={30}
             timeCaption="Inicio"
             dateFormat="HH:mm"
-            minTime={new Date(0, 0, 0, 7, 0)}
-            maxTime={new Date(0, 0, 0, 15, 0)}
+            minTime={new Date("1970-01-01T07:00:00Z")}
+            maxTime={new Date("1970-01-01T15:00:00Z")}
             className="form-control w-full px-3 py-2 border rounded"
           />
           <DatePicker
@@ -99,8 +102,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
             timeIntervals={30}
             timeCaption="Fin"
             dateFormat="HH:mm"
-            minTime={new Date(0, 0, 0, 7, 0)}
-            maxTime={new Date(0, 0, 0, 15, 0)}
+            minTime={new Date("1970-01-01T07:00:00Z")}
+            maxTime={new Date("1970-01-01T15:00:00Z")}
             className="form-control w-full px-3 py-2 border rounded"
           />
         </div>

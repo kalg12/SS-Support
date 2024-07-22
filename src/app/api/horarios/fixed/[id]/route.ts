@@ -11,7 +11,7 @@ export async function PATCH(
 
   if (!token) {
     return NextResponse.json(
-      { success: false, message: "Unauthorized" },
+      { success: false, message: "Unauthorized: No token provided" },
       { status: 401 }
     );
   }
@@ -20,7 +20,7 @@ export async function PATCH(
 
   if (!user) {
     return NextResponse.json(
-      { success: false, message: "Unauthorized" },
+      { success: false, message: "Unauthorized: Invalid token" },
       { status: 401 }
     );
   }
@@ -30,29 +30,47 @@ export async function PATCH(
 
   if (!dia_semana || !hora_inicio || !hora_fin) {
     return NextResponse.json(
-      { success: false, message: "Invalid input" },
+      { success: false, message: "Invalid input: Missing required fields" },
       { status: 400 }
     );
   }
 
   try {
+    // Verificar que el becario_id existe en la tabla becarios
+    const [becarioCheck]: any = await pool.query(
+      "SELECT id FROM becarios WHERE usuario_id = ?",
+      [user.id]
+    );
+
+    if (becarioCheck.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Becario no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const becarioId = becarioCheck[0].id;
+
     const [result]: any = await pool.query(
-      "UPDATE horarios_fijos_becarios SET dia_semana = ?, hora_inicio = ?, hora_fin = ? WHERE id = ? AND becario_id = (SELECT id FROM becarios WHERE usuario_id = ?)",
-      [dia_semana, hora_inicio, hora_fin, id, user.id]
+      "UPDATE horarios_fijos_becarios SET dia_semana = ?, hora_inicio = ?, hora_fin = ? WHERE id = ? AND becario_id = ?",
+      [dia_semana, hora_inicio, hora_fin, id, becarioId]
     );
 
     if (result.affectedRows > 0) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { success: false, message: "Schedule update failed" },
+        { success: false, message: "Schedule update failed: No rows affected" },
         { status: 400 }
       );
     }
   } catch (error) {
     console.error("Error updating schedule:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      {
+        success: false,
+        message: "Internal server error: " + (error as Error).message,
+      },
       { status: 500 }
     );
   }
