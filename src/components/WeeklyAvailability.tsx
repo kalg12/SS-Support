@@ -172,11 +172,11 @@ const WeeklyAvailability = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold">Your Weekly Schedule</h2>
+      <h2 className="text-2xl font-semibold">Su horario semanal</h2>
       {schedules.map((schedule) => (
         <div key={schedule.id} className="mt-2">
           <p>{`${schedule.dia_semana}: ${schedule.hora_inicio} - ${schedule.hora_fin}`}</p>
-          <Button onClick={() => handleEditClick(schedule)}>Edit</Button>
+          <Button onClick={() => handleEditClick(schedule)}>Editar</Button>
         </div>
       ))}
       {selectedSchedule && isModalOpen && (
