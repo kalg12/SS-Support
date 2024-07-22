@@ -1,34 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import pool from "@/utils/db";
 
-const JWT_SECRET = process.env.JWT_SECRET || "app_service_social_ultras3cre3t";
-
 export async function POST(request: NextRequest) {
-  const token = request.headers.get("authorization")?.split(" ")[1];
-  if (!token) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  const {
+    nombre,
+    apellido,
+    fecha_nacimiento,
+    grupo,
+    telefono_whatsapp,
+    correo_electronico,
+    semestre,
+    foto,
+    rol_id,
+    password,
+    fecha_inicio_servicio,
+    fecha_fin_servicio,
+  } = await request.json();
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const {
-      nombre,
-      apellido,
-      fecha_nacimiento,
-      grupo,
-      telefono_whatsapp,
-      correo_electronico,
-      semestre,
-      foto,
-      rol_id,
-      password,
-    } = await request.json();
-
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const [result]: any = await pool.query(
@@ -48,6 +38,17 @@ export async function POST(request: NextRequest) {
     );
 
     if (result.affectedRows === 1) {
+      const userId = result.insertId;
+
+      // Si el rol es becario, insertar en la tabla becarios
+      if (rol_id === 3) {
+        // Asegúrate de que 3 es el ID para el rol becario
+        await pool.query(
+          "INSERT INTO becarios (usuario_id, fecha_inicio_servicio, fecha_fin_servicio) VALUES (?, ?, ?)",
+          [userId, fecha_inicio_servicio, fecha_fin_servicio]
+        );
+      }
+
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

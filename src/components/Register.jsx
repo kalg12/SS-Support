@@ -1,14 +1,11 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { useRegisterUserMutation } from "@/services/userApi";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { selectToken } from "@/store/authSlice";
 import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { selectToken } from "@/store/authSlice"; // Importa el selector selectToken
 
 const grupos = [
   "Mecánica Naval",
@@ -22,13 +19,14 @@ const grupos = [
 const semestres = [1, 2, 3, 4, 5, 6];
 
 const roles = [
-  { id: 1, nombre: "Superadmin" },
-  { id: 2, nombre: "Admin" },
-  { id: 3, nombre: "Becario" },
-  { id: 4, nombre: "Estudiante" },
+  { id: 1, nombre: "superadmin" },
+  { id: 2, nombre: "admin" },
+  { id: 3, nombre: "becario" },
 ];
 
-const RegisterUser = () => {
+const Register = () => {
+  const token = useSelector(selectToken);
+  const router = useRouter();
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
@@ -37,14 +35,12 @@ const RegisterUser = () => {
     telefono_whatsapp: "",
     correo_electronico: "",
     semestre: semestres[0],
-    foto: null,
+    foto: "",
     rol_id: roles[0].id,
     password: "",
+    fecha_inicio_servicio: "",
+    fecha_fin_servicio: "",
   });
-
-  const router = useRouter();
-  const [registerUser] = useRegisterUserMutation();
-  const token = useSelector(selectToken);
 
   const handleChange = (e) => {
     setFormData({
@@ -56,11 +52,20 @@ const RegisterUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await registerUser({ formData, token }).unwrap();
-      if (response.success) {
+      const response = await fetch("/api/users/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+
+      if (data.success) {
         Swal.fire({
           title: "Success",
-          text: "User registered successfully!",
+          text: "User created successfully!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
@@ -69,16 +74,16 @@ const RegisterUser = () => {
       } else {
         Swal.fire({
           title: "Error",
-          text: "User registration failed",
+          text: data.message,
           icon: "error",
           confirmButtonText: "OK",
         });
       }
     } catch (error) {
-      console.error("Error registering user:", error);
+      console.error("Error creating user:", error);
       Swal.fire({
         title: "Error",
-        text: "An error occurred during registration",
+        text: "An error occurred while creating the user",
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -148,6 +153,24 @@ const RegisterUser = () => {
             </select>
           </div>
           <div className="mb-4">
+            <Label htmlFor="semestre" className="block text-gray-700">
+              Semestre
+            </Label>
+            <select
+              id="semestre"
+              name="semestre"
+              value={formData.semestre}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+            >
+              {semestres.map((semestre) => (
+                <option key={semestre} value={semestre}>
+                  {semestre}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
             <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
               Teléfono WhatsApp
             </Label>
@@ -174,22 +197,17 @@ const RegisterUser = () => {
             />
           </div>
           <div className="mb-4">
-            <Label htmlFor="semestre" className="block text-gray-700">
-              Semestre
+            <Label htmlFor="password" className="block text-gray-700">
+              Password
             </Label>
-            <select
-              id="semestre"
-              name="semestre"
-              value={formData.semestre}
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={formData.password}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
-            >
-              {semestres.map((semestre) => (
-                <option key={semestre} value={semestre}>
-                  {semestre}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="mb-4">
             <Label htmlFor="rol_id" className="block text-gray-700">
@@ -209,24 +227,47 @@ const RegisterUser = () => {
               ))}
             </select>
           </div>
-          <div className="mb-6">
-            <Label htmlFor="password" className="block text-gray-700">
-              Contraseña
-            </Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
-            />
-          </div>
+          {formData.rol_id === 3 && (
+            <>
+              <div className="mb-4">
+                <Label
+                  htmlFor="fecha_inicio_servicio"
+                  className="block text-gray-700"
+                >
+                  Fecha de Inicio de Servicio
+                </Label>
+                <Input
+                  id="fecha_inicio_servicio"
+                  name="fecha_inicio_servicio"
+                  type="date"
+                  value={formData.fecha_inicio_servicio}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <Label
+                  htmlFor="fecha_fin_servicio"
+                  className="block text-gray-700"
+                >
+                  Fecha de Fin de Servicio
+                </Label>
+                <Input
+                  id="fecha_fin_servicio"
+                  name="fecha_fin_servicio"
+                  type="date"
+                  value={formData.fecha_fin_servicio}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+            </>
+          )}
           <Button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"
           >
-            Registrar Usuario
+            Register
           </Button>
         </form>
       </div>
@@ -234,4 +275,4 @@ const RegisterUser = () => {
   );
 };
 
-export default RegisterUser;
+export default Register;

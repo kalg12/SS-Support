@@ -42,6 +42,10 @@ const Sidebar = () => {
             >
               <FaUserPlus className="mr-2" /> Agregar Usuario
             </Link>
+          </>
+        )}
+        {(role === "becario" || role === "superadmin" || role === "admin") && (
+          <>
             <Link
               href="/dashboard/tickets"
               className="flex items-center py-2.5 px-4 text-white hover:bg-gray-700 transition duration-200"
@@ -50,16 +54,12 @@ const Sidebar = () => {
             </Link>
           </>
         )}
-        {role === "becario" && (
-          <>
-            <Link
-              href="/dasboard/servicio-social/horarios"
-              className="flex items-center py-2.5 px-4 text-white hover:bg-gray-700 transition duration-200"
-            >
-              <FaCalendarAlt className="mr-2" /> Horarios
-            </Link>
-          </>
-        )}
+        <Link
+          href="/dashboard/horarios"
+          className="flex items-center py-2.5 px-4 text-white hover:bg-gray-700 transition duration-200"
+        >
+          <FaCalendarAlt className="mr-2" /> Mi horario disponible
+        </Link>
       </nav>
     </div>
   );
