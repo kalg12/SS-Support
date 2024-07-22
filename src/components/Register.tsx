@@ -42,14 +42,22 @@ const Register = () => {
     fecha_fin_servicio: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleRoleChange = (e) => {
+  const handleRoleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newRole = parseInt(e.target.value);
     setFormData({
       ...formData,
@@ -60,7 +68,9 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement> | React.MouseEvent
+  ) => {
     e.preventDefault();
     try {
       const response = await fetch("/api/users/create", {
