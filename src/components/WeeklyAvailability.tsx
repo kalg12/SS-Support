@@ -26,6 +26,7 @@ const WeeklyAvailability = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [newDays, setNewDays] = useState<string[]>([]);
   const [newStartTime, setNewStartTime] = useState<Date | null>(null);
   const [newEndTime, setNewEndTime] = useState<Date | null>(null);
@@ -89,13 +90,33 @@ const WeeklyAvailability = () => {
       return;
     }
 
-    const newSchedule = {
-      days: newDays,
-      startTime: newStartTime.toTimeString().split(" ")[0],
-      endTime: newEndTime.toTimeString().split(" ")[0],
-    };
-
     try {
+      const existingDay = newDays.find((day) =>
+        schedules.some((schedule) => schedule.dia_semana === day)
+      );
+
+      if (existingDay) {
+        Swal.fire({
+          title: "Error",
+          text: `Ya tienes un horario para ${existingDay}. Por favor, edítalo.`,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+
+      const newSchedule = {
+        days: newDays,
+        startTime: newStartTime.toLocaleTimeString("en-US", {
+          hour12: false,
+          timeZone: "America/Mexico_City",
+        }),
+        endTime: newEndTime.toLocaleTimeString("en-US", {
+          hour12: false,
+          timeZone: "America/Mexico_City",
+        }),
+      };
+
       const response = await fetch("/api/horarios/fixed", {
         method: "POST",
         headers: {
@@ -104,6 +125,7 @@ const WeeklyAvailability = () => {
         },
         body: JSON.stringify(newSchedule),
       });
+
       const data = await response.json();
 
       if (data.success) {
@@ -142,33 +164,30 @@ const WeeklyAvailability = () => {
     }
   };
 
+  const minTime = new Date();
+  minTime.setHours(7, 0, 0, 0);
+
+  const maxTime = new Date();
+  maxTime.setHours(15, 0, 0, 0);
+
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-semibold mb-4">Horario Semanal</h2>
-      <div className="grid grid-cols-5 gap-4 mb-4">
-        {daysOfWeek.map((day) => (
-          <div key={day} className="p-4 bg-white shadow-md rounded">
-            <h3 className="text-xl font-bold mb-2">{day}</h3>
-            {schedules
-              .filter((schedule) => schedule.dia_semana === day)
-              .map((schedule) => (
-                <div key={schedule.id} className="mb-2">
-                  <p>
-                    {schedule.hora_inicio} - {schedule.hora_fin}
-                  </p>
-                  <Button
-                    onClick={() => handleEditClick(schedule)}
-                    className="mt-2"
-                  >
-                    Editar
-                  </Button>
-                </div>
-              ))}
-          </div>
-        ))}
-      </div>
-      <div className="bg-white shadow-md rounded p-4 mb-6">
-        <h3 className="text-xl font-bold mb-4">Añadir Horarios</h3>
+      <h2 className="text-2xl font-semibold">Your Weekly Schedule</h2>
+      {schedules.map((schedule) => (
+        <div key={schedule.id} className="mt-2">
+          <p>{`${schedule.dia_semana}: ${schedule.hora_inicio} - ${schedule.hora_fin}`}</p>
+          <Button onClick={() => handleEditClick(schedule)}>Edit</Button>
+        </div>
+      ))}
+      {selectedSchedule && isModalOpen && (
+        <EditScheduleModal
+          schedule={selectedSchedule}
+          onSave={handleUpdateSchedule}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+      <div className="mt-4">
+        <h3 className="text-xl font-semibold">Añadir Horarios</h3>
         <div className="grid grid-cols-5 gap-2 mb-4">
           {daysOfWeek.map((day) => (
             <button
@@ -185,43 +204,31 @@ const WeeklyAvailability = () => {
         <div className="flex items-center space-x-4 mb-4">
           <DatePicker
             selected={newStartTime}
-            onChange={(time) => setNewStartTime(time)}
+            onChange={setNewStartTime}
             showTimeSelect
             showTimeSelectOnly
             timeIntervals={30}
             timeCaption="Inicio"
             dateFormat="HH:mm"
-            minTime={new Date("1970-01-01T13:00:00Z")}
-            maxTime={new Date("1970-01-01T21:00:00Z")}
-            className="w-1/3 px-3 py-2 border rounded"
+            minTime={minTime}
+            maxTime={maxTime}
+            className="form-control w-full px-3 py-2 border rounded"
           />
           <DatePicker
             selected={newEndTime}
-            onChange={(time) => setNewEndTime(time)}
+            onChange={setNewEndTime}
             showTimeSelect
             showTimeSelectOnly
             timeIntervals={30}
             timeCaption="Fin"
             dateFormat="HH:mm"
-            minTime={new Date("1970-01-01T13:00:00Z")}
-            maxTime={new Date("1970-01-01T21:00:00Z")}
-            className="w-1/3 px-3 py-2 border rounded"
+            minTime={minTime}
+            maxTime={maxTime}
+            className="form-control w-full px-3 py-2 border rounded"
           />
-          <Button
-            className="bg-green-500 hover:bg-green-700"
-            onClick={handleAddSchedule}
-          >
-            Añadir
-          </Button>
+          <Button onClick={handleAddSchedule}>Agregar</Button>
         </div>
       </div>
-      {selectedSchedule && isModalOpen && (
-        <EditScheduleModal
-          schedule={selectedSchedule}
-          onSave={handleUpdateSchedule}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
     </div>
   );
 };
