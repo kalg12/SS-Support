@@ -1,4 +1,3 @@
-// src/components/EditScheduleModal.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -27,6 +26,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
   onClose,
   onSave,
 }) => {
+  const token = useSelector(selectToken);
+
   const parseTimeString = (time: string) => {
     const [hours, minutes] = time.split(":").map(Number);
     const date = new Date();
@@ -41,8 +42,6 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
     parseTimeString(schedule.hora_fin)
   );
 
-  const token = useSelector(selectToken);
-
   const handleSave = async () => {
     if (!startTime || !endTime) {
       Swal.fire("Error", "Debe seleccionar una hora de inicio y fin.", "error");
@@ -51,8 +50,14 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
 
     const updatedSchedule = {
       ...schedule,
-      hora_inicio: startTime.toISOString().substring(11, 16),
-      hora_fin: endTime.toISOString().substring(11, 16),
+      hora_inicio: startTime.toLocaleTimeString("en-US", {
+        hour12: false,
+        timeZone: "America/Mexico_City",
+      }),
+      hora_fin: endTime.toLocaleTimeString("en-US", {
+        hour12: false,
+        timeZone: "America/Mexico_City",
+      }),
     };
 
     try {
@@ -78,6 +83,13 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
     }
   };
 
+  // Configurar los límites de tiempo para la zona horaria de América Central (CD MX)
+  const minTime = new Date();
+  minTime.setHours(7, 0, 0, 0);
+
+  const maxTime = new Date();
+  maxTime.setHours(15, 0, 0, 0);
+
   return (
     <Modal onClose={onClose} title="Editar Horario">
       <div className="p-4">
@@ -90,8 +102,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
             timeIntervals={30}
             timeCaption="Inicio"
             dateFormat="HH:mm"
-            minTime={new Date("1970-01-01T07:00:00Z")}
-            maxTime={new Date("1970-01-01T15:00:00Z")}
+            minTime={minTime}
+            maxTime={maxTime}
             className="form-control w-full px-3 py-2 border rounded"
           />
           <DatePicker
@@ -102,8 +114,8 @@ const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
             timeIntervals={30}
             timeCaption="Fin"
             dateFormat="HH:mm"
-            minTime={new Date("1970-01-01T07:00:00Z")}
-            maxTime={new Date("1970-01-01T15:00:00Z")}
+            minTime={minTime}
+            maxTime={maxTime}
             className="form-control w-full px-3 py-2 border rounded"
           />
         </div>
