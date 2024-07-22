@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
 interface Ticket {
@@ -55,23 +64,49 @@ const TicketList = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-4xl">
         <h2 className="text-2xl font-bold mb-6">Tickets</h2>
-        <ul className="space-y-4">
-          {tickets.map((ticket) => (
-            <li key={ticket.id} className="p-4 bg-gray-200 rounded shadow">
-              <p className="text-lg font-bold">
-                {ticket.nombre} {ticket.apellido}
-              </p>
-              <p className="text-sm">
-                {ticket.grupo} - Semestre {ticket.semestre}
-              </p>
-              <p className="text-sm">{ticket.telefono_whatsapp}</p>
-              <p className="text-sm">{ticket.descripcion}</p>
-              <p className="text-sm text-gray-500">
-                {new Date(ticket.fecha_creacion).toLocaleString()}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <Table>
+          <TableCaption>Lista de tickets de soporte.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Nombre</TableHead>
+              <TableHead>Apellido</TableHead>
+              <TableHead>Grupo</TableHead>
+              <TableHead>Semestre</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Creación</TableHead>
+              <TableHead>Actualización</TableHead>
+              <TableHead>Horario Agendado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {tickets.map((ticket) => (
+              <TableRow key={ticket.id}>
+                <TableCell className="font-medium">{ticket.nombre}</TableCell>
+                <TableCell>{ticket.apellido}</TableCell>
+                <TableCell>{ticket.grupo}</TableCell>
+                <TableCell>{ticket.semestre}</TableCell>
+                <TableCell>{ticket.telefono_whatsapp}</TableCell>
+                <TableCell>{ticket.descripcion}</TableCell>
+                <TableCell>{ticket.estado}</TableCell>
+                <TableCell>
+                  {new Date(ticket.fecha_creacion).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  {ticket.fecha_actualizacion
+                    ? new Date(ticket.fecha_actualizacion).toLocaleString()
+                    : "N/A"}
+                </TableCell>
+                <TableCell>
+                  {ticket.horario_agendado
+                    ? new Date(ticket.horario_agendado).toLocaleString()
+                    : "N/A"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
