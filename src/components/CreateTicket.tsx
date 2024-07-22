@@ -45,7 +45,7 @@ const CreateTicket = () => {
 
   const handleSlotSelect = (date: Date, time: string) => {
     const formattedDate = date.toISOString().split("T")[0];
-    const horarioAgendado = `${formattedDate}T${time}:00`;
+    const horarioAgendado = `${formattedDate}T${time.split(" - ")[0]}:00`;
     setFormData((prevData) => ({
       ...prevData,
       horario_agendado: horarioAgendado,
@@ -54,6 +54,26 @@ const CreateTicket = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación de todos los campos requeridos
+    if (
+      !formData.nombre ||
+      !formData.apellido ||
+      !formData.grupo ||
+      !formData.semestre ||
+      !formData.telefono_whatsapp ||
+      !formData.descripcion ||
+      !formData.horario_agendado
+    ) {
+      Swal.fire({
+        title: "Error",
+        text: "Por favor, completa todos los campos.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
     try {
       const response = await fetch("/api/tickets/create", {
         method: "POST",
@@ -62,12 +82,13 @@ const CreateTicket = () => {
         },
         body: JSON.stringify(formData),
       });
+
       const data = await response.json();
 
       if (data.success) {
         Swal.fire({
           title: "Success",
-          text: "Ticket created successfully!",
+          text: "Ticket creado exitosamente!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
@@ -85,7 +106,7 @@ const CreateTicket = () => {
       console.error("Error creating ticket:", error);
       Swal.fire({
         title: "Error",
-        text: "An error occurred while creating the ticket",
+        text: "Ocurrió un error al crear el ticket",
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -191,7 +212,7 @@ const CreateTicket = () => {
             <Input
               id="horario_agendado"
               name="horario_agendado"
-              type="text"
+              type="datetime-local"
               value={formData.horario_agendado}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded"

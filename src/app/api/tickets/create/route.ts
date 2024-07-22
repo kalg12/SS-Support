@@ -2,34 +2,69 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
 
 export async function POST(request: NextRequest) {
-  const { estudiante_id, descripcion, becario_id, horario_agendado } =
-    await request.json();
+  const {
+    nombre,
+    apellido,
+    grupo,
+    semestre,
+    telefono_whatsapp,
+    descripcion,
+    horario_agendado,
+  } = await request.json();
 
-  if (!estudiante_id || !descripcion || !becario_id || !horario_agendado) {
+  if (
+    !nombre ||
+    !apellido ||
+    !grupo ||
+    !semestre ||
+    !telefono_whatsapp ||
+    !descripcion ||
+    !horario_agendado
+  ) {
     return NextResponse.json(
-      { success: false, message: "Invalid input" },
+      { success: false, message: "Todos los campos son obligatorios." },
       { status: 400 }
     );
   }
 
+  const estado = "pendiente"; // Estado inicial del ticket
+  const fechaCreacion = new Date().toISOString();
+  const fechaActualizacion = fechaCreacion;
+
   try {
-    const [result]: any = await pool.query(
-      "INSERT INTO tickets (estudiante_id, descripcion, estado, becario_id, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, 'pendiente', ?, NOW(), NOW(), ?)",
-      [estudiante_id, descripcion, becario_id, horario_agendado]
+    // Crear estudiante
+    const [estudianteResult]: any = await pool.query(
+      "INSERT INTO estudiantes (nombre, apellido, grupo, semestre, telefono_whatsapp) VALUES (?, ?, ?, ?, ?)",
+      [nombre, apellido, grupo, semestre, telefono_whatsapp]
     );
 
-    if (result.affectedRows > 0) {
+    const estudianteId = estudianteResult.insertId;
+
+    // Crear ticket
+    const [ticketResult]: any = await pool.query(
+      "INSERT INTO tickets (estudiante_id, descripcion, estado, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        estudianteId,
+        descripcion,
+        estado,
+        fechaCreacion,
+        fechaActualizacion,
+        horario_agendado,
+      ]
+    );
+
+    if (ticketResult.affectedRows > 0) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { success: false, message: "Failed to create ticket" },
+        { success: false, message: "Error al crear el ticket." },
         { status: 400 }
       );
     }
   } catch (error) {
     console.error("Error creating ticket:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: "Error interno del servidor." },
       { status: 500 }
     );
   }
