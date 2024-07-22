@@ -24,7 +24,9 @@ const Login = () => {
       const response = await loginUser({ email, password }).unwrap();
       if (response.success) {
         const { token, rol, nombre, apellido, foto } = response;
-        dispatch(login({ token, role: rol, nombre, apellido, foto }));
+        dispatch(
+          login({ token, role: rol, nombre, apellido, foto, becarioId: 0 })
+        );
         Cookies.set("token", token, { expires: 1 }); // Guarda el token en las cookies por 1 día
         Swal.fire({
           title: "Success",

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 
-const grupos = [
-  "Mecánica Naval",
+const carretasTecnicas = [
+  "Técnico en Mecánica Naval",
   "Refrigeración",
-  "Químico Biólogo",
+  "Acuacultura",
+  "Laboratorista Ambiental",
   "Alimentos y Bebidas",
   "Recreaciones Acuáticas",
-  "Acuacultura",
 ];
+
+const grupos = ["A", "B", "C", "D", "E", "F", "G"];
 
 const semestres = [1, 2, 3, 4, 5, 6];
 
@@ -31,6 +33,20 @@ const CreateTicket = () => {
   });
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (formData.semestre > 1) {
+      setFormData((prevData) => ({
+        ...prevData,
+        grupo: carretasTecnicas[0],
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        grupo: grupos[0],
+      }));
+    }
+  }, [formData.semestre]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -113,10 +129,19 @@ const CreateTicket = () => {
     }
   };
 
+  const renderGrupoOptions = () => {
+    const options = formData.semestre > 1 ? carretasTecnicas : grupos;
+    return options.map((option) => (
+      <option key={option} value={option}>
+        {option}
+      </option>
+    ));
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Crear Ticket</h2>
+        <h2 className="text-2xl font-bold mb-6">Asesoría Técnica</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <Label htmlFor="nombre" className="block text-gray-700">
@@ -145,24 +170,6 @@ const CreateTicket = () => {
             />
           </div>
           <div className="mb-4">
-            <Label htmlFor="grupo" className="block text-gray-700">
-              Grupo
-            </Label>
-            <select
-              id="grupo"
-              name="grupo"
-              value={formData.grupo}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
-            >
-              {grupos.map((grupo) => (
-                <option key={grupo} value={grupo}>
-                  {grupo}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4">
             <Label htmlFor="semestre" className="block text-gray-700">
               Semestre
             </Label>
@@ -181,6 +188,20 @@ const CreateTicket = () => {
             </select>
           </div>
           <div className="mb-4">
+            <Label htmlFor="grupo" className="block text-gray-700">
+              Grupo o Carrera
+            </Label>
+            <select
+              id="grupo"
+              name="grupo"
+              value={formData.grupo}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+            >
+              {renderGrupoOptions()}
+            </select>
+          </div>
+          <div className="mb-4">
             <Label htmlFor="telefono_whatsapp" className="block text-gray-700">
               Teléfono WhatsApp
             </Label>
@@ -195,7 +216,7 @@ const CreateTicket = () => {
           </div>
           <div className="mb-6">
             <Label htmlFor="descripcion" className="block text-gray-700">
-              Descripción
+              ¿Qué ayuda necesitas?
             </Label>
             <textarea
               id="descripcion"
