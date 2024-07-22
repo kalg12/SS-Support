@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
@@ -43,11 +43,13 @@ const CreateTicket = () => {
     });
   };
 
-  const handleSelectSlot = (date: Date, time: string) => {
-    setFormData({
-      ...formData,
-      horario_agendado: `${date.toISOString().split("T")[0]} ${time}`,
-    });
+  const handleSlotSelect = (date: Date, time: string) => {
+    const formattedDate = date.toISOString().split("T")[0];
+    const horarioAgendado = `${formattedDate}T${time}:00`;
+    setFormData((prevData) => ({
+      ...prevData,
+      horario_agendado: horarioAgendado,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,7 +95,7 @@ const CreateTicket = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6">Create Ticket</h2>
+        <h2 className="text-2xl font-bold mb-6">Crear Ticket</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <Label htmlFor="nombre" className="block text-gray-700">
@@ -186,11 +188,17 @@ const CreateTicket = () => {
             <Label htmlFor="horario_agendado" className="block text-gray-700">
               Horario Agendado
             </Label>
-            <AvailabilityCalendar onSelectSlot={handleSelectSlot} />
-            <p className="mt-2 text-gray-600">
-              Selected Slot: {formData.horario_agendado}
-            </p>
+            <Input
+              id="horario_agendado"
+              name="horario_agendado"
+              type="text"
+              value={formData.horario_agendado}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded"
+              readOnly
+            />
           </div>
+          <AvailabilityCalendar onSelectSlot={handleSlotSelect} />
           <Button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"

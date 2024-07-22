@@ -1,7 +1,8 @@
+// src/app/api/tickets/availability/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const [rows]: any = await pool.query(
       "SELECT * FROM horarios_fijos_becarios"
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
       horarios: rows,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching schedules:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 }

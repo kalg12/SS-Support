@@ -1,3 +1,4 @@
+// src/components/AvailabilityCalendar.tsx
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import Swal from "sweetalert2";
@@ -57,6 +58,25 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
+  const getTimeSlots = (startTime: string, endTime: string) => {
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+    const slots = [];
+
+    while (start < end) {
+      const slotStart = new Date(start);
+      start.setMinutes(start.getMinutes() + 30);
+      const slotEnd = new Date(start);
+      slots.push(
+        `${slotStart.toTimeString().substring(0, 5)} - ${slotEnd
+          .toTimeString()
+          .substring(0, 5)}`
+      );
+    }
+
+    return slots;
+  };
+
   const renderTimeSlots = () => {
     if (!selectedDate) return null;
 
@@ -68,17 +88,21 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         schedule.dia_semana.toLowerCase() === dayOfWeek.toLowerCase()
     );
 
-    return slots.map((slot) => (
-      <div
-        key={slot.id}
-        className="time-slot"
-        onClick={() =>
-          handleTimeSelect(`${slot.hora_inicio} - ${slot.hora_fin}`)
-        }
-      >
-        {slot.hora_inicio} - {slot.hora_fin}
-      </div>
-    ));
+    if (slots.length === 0) {
+      return <p>No hay horarios disponibles para la fecha seleccionada.</p>;
+    }
+
+    return slots.flatMap((slot) =>
+      getTimeSlots(slot.hora_inicio, slot.hora_fin).map((timeSlot, index) => (
+        <div
+          key={`${slot.id}-${index}`}
+          className="time-slot"
+          onClick={() => handleTimeSelect(timeSlot)}
+        >
+          {timeSlot}
+        </div>
+      ))
+    );
   };
 
   return (
