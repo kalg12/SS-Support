@@ -61,7 +61,7 @@ const CreateTicket = () => {
 
   const handleSlotSelect = (date: Date, time: string) => {
     const formattedDate = date.toISOString().split("T")[0];
-    const horarioAgendado = `${formattedDate}T${time.split(" - ")[0]}:00`;
+    const horarioAgendado = `${formattedDate} ${time}`;
     setFormData((prevData) => ({
       ...prevData,
       horario_agendado: horarioAgendado,
@@ -236,15 +236,9 @@ const CreateTicket = () => {
             >
               Horario Agendado
             </Label>
-            <Input
-              id="horario_agendado"
-              name="horario_agendado"
-              type="text"
-              value={formData.horario_agendado}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded"
-              readOnly
-            />
+            <div className="w-full px-3 py-2 border rounded">
+              El horario que has elegido es: {formData.horario_agendado}
+            </div>
           </div>
           <Button
             type="submit"
