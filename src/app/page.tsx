@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "@/store/authSlice";
 import Login from "@/components/Login";
+import NotificationList from "@/components/NotificationList";
 
 export default function Home() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -16,5 +17,10 @@ export default function Home() {
     }
   }, [isAuthenticated, router]);
 
-  return <>{!isAuthenticated && <Login />}</>;
+  return (
+    <>
+      {!isAuthenticated && <Login />}
+      {isAuthenticated && <NotificationList />}
+    </>
+  );
 }
