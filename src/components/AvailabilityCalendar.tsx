@@ -1,7 +1,7 @@
-// src/components/AvailabilityCalendar.tsx
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
-import Swal from "sweetalert2";
+import "react-calendar/dist/Calendar.css";
+import { Label } from "@/components/ui/label";
 
 interface Schedule {
   id: number;
@@ -11,15 +11,16 @@ interface Schedule {
   hora_fin: string;
 }
 
-interface AvailabilityCalendarProps {
+interface AvailabilitySelectorProps {
   onSelectSlot: (date: Date, time: string) => void;
 }
 
-const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
+const AvailabilitySelector: React.FC<AvailabilitySelectorProps> = ({
   onSelectSlot,
 }) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -30,19 +31,39 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
         if (data.success) {
           setSchedules(data.horarios);
         } else {
-          Swal.fire("Error", data.message, "error");
+          console.error(data.message);
         }
       } catch (error) {
-        Swal.fire(
-          "Error",
-          "An error occurred while fetching the schedules",
-          "error"
-        );
+        console.error("Error fetching schedules:", error);
       }
     };
 
     fetchSchedules();
   }, []);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const dayOfWeek = selectedDate.toLocaleDateString("es-MX", {
+        weekday: "long",
+      });
+      const slots = schedules.filter(
+        (schedule) =>
+          schedule.dia_semana.toLowerCase() === dayOfWeek.toLowerCase()
+      );
+
+      const newTimeSlots: string[] = [];
+      slots.forEach((slot) => {
+        const start = new Date(`1970-01-01T${slot.hora_inicio}`);
+        const end = new Date(`1970-01-01T${slot.hora_fin}`);
+        while (start < end) {
+          newTimeSlots.push(start.toTimeString().split(" ")[0].slice(0, 5));
+          start.setMinutes(start.getMinutes() + 30);
+        }
+      });
+
+      setAvailableTimes(newTimeSlots);
+    }
+  }, [selectedDate, schedules]);
 
   const handleDateChange = (value: Date | Date[] | null) => {
     if (value && !(value instanceof Array)) {
@@ -50,69 +71,40 @@ const AvailabilityCalendar: React.FC<AvailabilityCalendarProps> = ({
     }
   };
 
-  const handleTimeSelect = (time: string) => {
+  const handleTimeSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (selectedDate) {
-      onSelectSlot(selectedDate, time);
-    } else {
-      Swal.fire("Error", "Please select a date first", "error");
+      onSelectSlot(selectedDate, event.target.value);
     }
-  };
-
-  const getTimeSlots = (startTime: string, endTime: string) => {
-    const start = new Date(`1970-01-01T${startTime}`);
-    const end = new Date(`1970-01-01T${endTime}`);
-    const slots = [];
-
-    while (start < end) {
-      const slotStart = new Date(start);
-      start.setMinutes(start.getMinutes() + 30);
-      const slotEnd = new Date(start);
-      slots.push(
-        `${slotStart.toTimeString().substring(0, 5)} - ${slotEnd
-          .toTimeString()
-          .substring(0, 5)}`
-      );
-    }
-
-    return slots;
-  };
-
-  const renderTimeSlots = () => {
-    if (!selectedDate) return null;
-
-    const dayOfWeek = selectedDate.toLocaleDateString("es-MX", {
-      weekday: "long",
-    });
-    const slots = schedules.filter(
-      (schedule) =>
-        schedule.dia_semana.toLowerCase() === dayOfWeek.toLowerCase()
-    );
-
-    if (slots.length === 0) {
-      return <p>No hay horarios disponibles para la fecha seleccionada.</p>;
-    }
-
-    return slots.flatMap((slot) =>
-      getTimeSlots(slot.hora_inicio, slot.hora_fin).map((timeSlot, index) => (
-        <div
-          key={`${slot.id}-${index}`}
-          className="time-slot"
-          onClick={() => handleTimeSelect(timeSlot)}
-        >
-          {timeSlot}
-        </div>
-      ))
-    );
   };
 
   return (
-    <div className="availability-calendar">
+    <div>
+      <Label htmlFor="calendar" className="block text-gray-700 mb-2">
+        Selecciona una fecha:
+      </Label>
       <Calendar
         onChange={(value) => handleDateChange(value as Date | Date[] | null)}
       />
-      <div className="time-slots">{renderTimeSlots()}</div>
+      {selectedDate && availableTimes.length > 0 && (
+        <div className="mt-4">
+          <Label htmlFor="time" className="block text-gray-700 mb-2">
+            Selecciona un horario disponible para el día seleccionado:
+          </Label>
+          <select
+            id="time"
+            className="w-full px-3 py-2 border rounded"
+            onChange={handleTimeSelect}
+          >
+            {availableTimes.map((time, index) => (
+              <option key={index} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AvailabilityCalendar;
+export default AvailabilitySelector;

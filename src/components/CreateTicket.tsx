@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import AvailabilitySelector from "./AvailabilityCalendar";
 
 const carretasTecnicas = [
   "Técnico en Mecánica Naval",
@@ -226,21 +226,26 @@ const CreateTicket = () => {
               className="w-full px-3 py-2 border rounded"
             ></textarea>
           </div>
-          <div className="mb-4">
-            <Label htmlFor="horario_agendado" className="block text-gray-700">
+
+          <AvailabilitySelector onSelectSlot={handleSlotSelect} />
+
+          <div className="mt-4 mb-4">
+            <Label
+              htmlFor="horario_agendado"
+              className="block text-gray-700 mb-2"
+            >
               Horario Agendado
             </Label>
             <Input
               id="horario_agendado"
               name="horario_agendado"
-              type="datetime-local"
+              type="text"
               value={formData.horario_agendado}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded"
               readOnly
             />
           </div>
-          <AvailabilityCalendar onSelectSlot={handleSlotSelect} />
           <Button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded"

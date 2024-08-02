@@ -29,11 +29,14 @@ const Navbar = () => {
     router.push("/");
   };
 
+  const imageUrl =
+    foto && foto.startsWith("http") ? foto : "/assets/images/icon.jpg";
+
   return (
     <nav className="flex items-center justify-between p-4 bg-gray-900 text-white">
       <div className="flex items-center space-x-4">
         <Image
-          src={foto || "/path/to/default-profile-pic.jpg"}
+          src={imageUrl}
           alt="User Avatar"
           width={40}
           height={40}
