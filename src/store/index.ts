@@ -5,6 +5,7 @@ import storage from "redux-persist/lib/storage";
 import { userApi } from "@/services/userApi";
 import { ticketApi } from "@/services/ticketApi";
 import authReducer from "./authSlice";
+import notificationReducer from "./notificationSlice";
 
 const persistConfig = {
   key: "root",
@@ -18,6 +19,7 @@ const store = configureStore({
     auth: persistedReducer,
     [userApi.reducerPath]: userApi.reducer,
     [ticketApi.reducerPath]: ticketApi.reducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

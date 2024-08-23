@@ -1,45 +1,68 @@
-// src/components/NotificationProvider.tsx
 "use client";
+
 import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
+import { selectToken } from "@/store/authSlice";
+import {
+  fetchNotifications,
+  selectNotifications,
+  markNotificationAsRead,
+  Notification as AppNotification,
+} from "@/store/notificationSlice";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const NotificationProvider = () => {
-  useEffect(() => {
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission();
-    }
-  }, []);
-
-  const showNotification = (title: string, options?: NotificationOptions) => {
-    if (Notification.permission === "granted") {
-      new Notification(title, options);
-    }
-  };
+  const token = useSelector(selectToken);
+  const notifications = useSelector(selectNotifications);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch("/api/notifications/list");
-        const data = await response.json();
+    if (token) {
+      dispatch(fetchNotifications(token));
+    }
+  }, [token, dispatch]);
 
-        if (data.success) {
-          data.notifications.forEach((notification: any) => {
-            showNotification("Nueva notificación", {
+  useEffect(() => {
+    if (notifications && notifications.length > 0) {
+      notifications.forEach((notification: AppNotification) => {
+        if (!notification.leido) {
+          toast.info(notification.mensaje, {
+            onClose: () => {
+              if (token) {
+                dispatch(
+                  markNotificationAsRead({ id: notification.id, token })
+                );
+              }
+            },
+          });
+
+          // Notificación del navegador
+          if (Notification.permission === "granted") {
+            new Notification("Nueva notificación", {
               body: notification.mensaje,
             });
-          });
+          }
         }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
+      });
+    }
+  }, [notifications, dispatch, token]);
 
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000); // Check every minute
-
-    return () => clearInterval(interval);
+  // Solicita permisos de notificación del navegador al montar el componente
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission !== "granted") {
+          console.warn(
+            "Las notificaciones del navegador están deshabilitadas."
+          );
+        }
+      });
+    }
   }, []);
 
-  return null;
+  return <ToastContainer />;
 };
 
 export default NotificationProvider;

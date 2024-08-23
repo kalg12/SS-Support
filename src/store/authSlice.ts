@@ -8,7 +8,7 @@ export interface AuthState {
   nombre: string | null;
   apellido: string | null;
   foto: string | null;
-  becarioId: number | null; // Añadir becarioId
+  becarioId: number | null; // Añadido para almacenar el ID del becario
 }
 
 const initialState: AuthState = {
@@ -18,7 +18,7 @@ const initialState: AuthState = {
   nombre: null,
   apellido: null,
   foto: null,
-  becarioId: null, // Añadir becarioId
+  becarioId: null, // Inicializado
 };
 
 const authSlice = createSlice({
@@ -33,7 +33,7 @@ const authSlice = createSlice({
         nombre: string;
         apellido: string;
         foto: string;
-        becarioId: number; // Añadir becarioId
+        becarioId: number; // Añadido para manejar el ID del becario
       }>
     ) => {
       state.token = action.payload.token;
@@ -42,7 +42,7 @@ const authSlice = createSlice({
       state.nombre = action.payload.nombre;
       state.apellido = action.payload.apellido;
       state.foto = action.payload.foto;
-      state.becarioId = action.payload.becarioId; // Añadir becarioId
+      state.becarioId = action.payload.becarioId; // Almacenado
     },
     logout: (state) => {
       state.token = null;
@@ -51,7 +51,7 @@ const authSlice = createSlice({
       state.nombre = null;
       state.apellido = null;
       state.foto = null;
-      state.becarioId = null; // Añadir becarioId
+      state.becarioId = null; // Reiniciado
     },
   },
 });
@@ -65,6 +65,6 @@ export const selectNombre = (state: RootState) => state.auth.nombre;
 export const selectApellido = (state: RootState) => state.auth.apellido;
 export const selectFoto = (state: RootState) => state.auth.foto;
 export const selectToken = (state: RootState) => state.auth.token;
-export const selectBecarioId = (state: RootState) => state.auth.becarioId; // Añadir selectBecarioId
+export const selectBecarioId = (state: RootState) => state.auth.becarioId; // Seleccionado
 
 export default authSlice.reducer;

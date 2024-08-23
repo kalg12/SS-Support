@@ -32,9 +32,11 @@ interface Ticket {
 const TicketList = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const token = useSelector(selectToken);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchTickets = async () => {
+      setLoading(true);
       try {
         const response = await fetch("/api/tickets/list");
         const data = await response.json();
@@ -57,6 +59,8 @@ const TicketList = () => {
           icon: "error",
           confirmButtonText: "OK",
         });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -106,6 +110,10 @@ const TicketList = () => {
       });
     }
   };
+
+  if (loading) {
+    return <div>Loading tickets...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">

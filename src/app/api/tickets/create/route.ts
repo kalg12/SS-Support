@@ -27,12 +27,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const estado = "pendiente"; // Estado inicial del ticket
+  const estado = "pendiente";
   const fechaCreacion = new Date().toISOString();
   const fechaActualizacion = fechaCreacion;
 
   try {
-    // Crear estudiante
     const [estudianteResult]: any = await pool.query(
       "INSERT INTO estudiantes (nombre, apellido, grupo, semestre, telefono_whatsapp) VALUES (?, ?, ?, ?, ?)",
       [nombre, apellido, grupo, semestre, telefono_whatsapp]
@@ -40,29 +39,16 @@ export async function POST(request: NextRequest) {
 
     const estudianteId = estudianteResult.insertId;
 
-    // Obtener un becario asignado
-    // Aquí puedes implementar la lógica para seleccionar el becario, por ahora asumimos becario_id = 1
-    const becarioId = 1;
-
-    // Crear ticket
     const [ticketResult]: any = await pool.query(
-      "INSERT INTO tickets (estudiante_id, descripcion, estado, becario_id, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO tickets (estudiante_id, descripcion, estado, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?)",
       [
         estudianteId,
         descripcion,
         estado,
-        becarioId,
         fechaCreacion,
         fechaActualizacion,
         horario_agendado,
       ]
-    );
-
-    // Crear notificación para el becario
-    const mensaje = `Nuevo ticket creado por ${nombre} ${apellido}`;
-    await pool.query(
-      "INSERT INTO notificaciones (usuario_id, mensaje, leido, fecha_creacion) VALUES (?, ?, ?, NOW())",
-      [becarioId, mensaje, false]
     );
 
     if (ticketResult.affectedRows > 0) {
