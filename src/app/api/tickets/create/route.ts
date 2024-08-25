@@ -2,65 +2,89 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
 
 export async function POST(request: NextRequest) {
-  const {
-    nombre,
-    apellido,
-    grupo,
-    semestre,
-    telefono_whatsapp,
-    descripcion,
-    horario_agendado,
-  } = await request.json();
-
-  if (
-    !nombre ||
-    !apellido ||
-    !grupo ||
-    !semestre ||
-    !telefono_whatsapp ||
-    !descripcion ||
-    !horario_agendado
-  ) {
-    return NextResponse.json(
-      { success: false, message: "Todos los campos son obligatorios." },
-      { status: 400 }
-    );
-  }
-
-  const estado = "pendiente";
-  const fechaCreacion = new Date().toISOString();
-  const fechaActualizacion = fechaCreacion;
-
   try {
-    const [estudianteResult]: any = await pool.query(
-      "INSERT INTO estudiantes (nombre, apellido, grupo, semestre, telefono_whatsapp) VALUES (?, ?, ?, ?, ?)",
-      [nombre, apellido, grupo, semestre, telefono_whatsapp]
-    );
+    const {
+      nombre,
+      apellido,
+      grupo,
+      semestre,
+      telefono_whatsapp,
+      descripcion,
+      horario_agendado,
+    } = await request.json();
 
-    const estudianteId = estudianteResult.insertId;
-
-    const [ticketResult]: any = await pool.query(
-      "INSERT INTO tickets (estudiante_id, descripcion, estado, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?)",
-      [
-        estudianteId,
-        descripcion,
-        estado,
-        fechaCreacion,
-        fechaActualizacion,
-        horario_agendado,
-      ]
-    );
-
-    if (ticketResult.affectedRows > 0) {
-      return NextResponse.json({ success: true });
-    } else {
+    // Validar campos requeridos
+    if (
+      !nombre ||
+      !apellido ||
+      !grupo ||
+      !semestre ||
+      !telefono_whatsapp ||
+      !descripcion ||
+      !horario_agendado
+    ) {
       return NextResponse.json(
-        { success: false, message: "Error al crear el ticket." },
+        { success: false, message: "Todos los campos son obligatorios." },
         { status: 400 }
       );
     }
+
+    const estado = "pendiente";
+    const fechaCreacion = new Date().toISOString();
+    const fechaActualizacion = fechaCreacion;
+
+    // Iniciar una transacción
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    try {
+      // Insertar el estudiante
+      const [estudianteResult]: any = await connection.query(
+        "INSERT INTO estudiantes (nombre, apellido, grupo, semestre, telefono_whatsapp) VALUES (?, ?, ?, ?, ?)",
+        [nombre, apellido, grupo, semestre, telefono_whatsapp]
+      );
+
+      const estudianteId = estudianteResult.insertId;
+
+      // Insertar el ticket
+      const [ticketResult]: any = await connection.query(
+        "INSERT INTO tickets (estudiante_id, descripcion, estado, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?)",
+        [
+          estudianteId,
+          descripcion,
+          estado,
+          fechaCreacion,
+          fechaActualizacion,
+          horario_agendado,
+        ]
+      );
+
+      // Confirmar la transacción
+      await connection.commit();
+
+      if (ticketResult.affectedRows > 0) {
+        return NextResponse.json({ success: true });
+      } else {
+        // Revertir la transacción si el ticket no se creó
+        await connection.rollback();
+        return NextResponse.json(
+          { success: false, message: "Error al crear el ticket." },
+          { status: 400 }
+        );
+      }
+    } catch (error) {
+      // Revertir la transacción en caso de error
+      await connection.rollback();
+      console.error("Error creating ticket:", error);
+      return NextResponse.json(
+        { success: false, message: "Error interno del servidor." },
+        { status: 500 }
+      );
+    } finally {
+      connection.release();
+    }
   } catch (error) {
-    console.error("Error creating ticket:", error);
+    console.error("Error handling request:", error);
     return NextResponse.json(
       { success: false, message: "Error interno del servidor." },
       { status: 500 }
