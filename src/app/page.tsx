@@ -17,6 +17,12 @@ export default function Home() {
     }
   }, [isAuthenticated, router]);
 
+  useEffect(() => {
+    fetch("/api/socket").then(() => {
+      console.log("Socket.IO initialized");
+    });
+  }, []);
+
   return (
     <>
       {!isAuthenticated && <Login />}

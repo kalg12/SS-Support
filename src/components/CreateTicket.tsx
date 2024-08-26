@@ -71,7 +71,6 @@ const CreateTicket = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validación de todos los campos requeridos
     if (
       !formData.nombre ||
       !formData.apellido ||

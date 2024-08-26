@@ -1,3 +1,4 @@
+// src/components/NotificationProvider.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -9,21 +10,21 @@ import {
   fetchNotifications,
   selectNotifications,
   markNotificationAsRead,
-  Notification as AppNotification, // Renombrado para evitar conflicto
+  Notification as AppNotification,
 } from "@/store/notificationSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const socket = io("http://localhost:3000"); // Ajusta la URL si es necesario
+const socket = io(); // Conexión al servidor Socket.IO en la misma URL
 
 const NotificationProvider = () => {
-  const token = useSelector(selectToken) || ""; // Asegura que token siempre sea un string
+  const token = useSelector(selectToken);
   const notifications = useSelector(selectNotifications);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    socket.on("nueva-notificacion", (data) => {
-      toast.info(data.mensaje, {
+    socket.on("new-ticket", (data) => {
+      toast.info(data.message, {
         autoClose: 5000,
         position: "top-right",
         closeOnClick: true,
@@ -31,13 +32,13 @@ const NotificationProvider = () => {
 
       if (Notification.permission === "granted") {
         new Notification("Nueva notificación", {
-          body: data.mensaje,
+          body: data.message,
         });
       }
     });
 
     return () => {
-      socket.off("nueva-notificacion");
+      socket.off("new-ticket");
     };
   }, []);
 

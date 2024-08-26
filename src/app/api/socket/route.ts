@@ -1,31 +1,33 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Server as IOServer } from "socket.io";
 import { Server as HTTPServer } from "http";
-import { Socket } from "net"; // Importar el tipo Socket de 'net'
+import { Server as IOServer } from "socket.io";
+import { Socket } from "net";
 
 interface SocketServer extends HTTPServer {
   io?: IOServer;
 }
 
-interface SocketWithServer extends Socket {
-  server: SocketServer;
-}
-
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const socketWithServer = res.socket as unknown as SocketWithServer;
+  if (res.socket) {
+    const socket = res.socket as any;
+    const server: SocketServer = socket.server;
 
-  if (!socketWithServer.server.io) {
-    console.log("Setting up socket.io");
-    const io = new IOServer(socketWithServer.server);
-    socketWithServer.server.io = io;
-
-    io.on("connection", (socket) => {
-      console.log("New socket connection", socket.id);
-
-      socket.on("disconnect", () => {
-        console.log("Socket disconnected", socket.id);
+    if (!server.io) {
+      console.log("Initializing Socket.IO...");
+      const io = new IOServer(server, {
+        path: "/api/socket", // Asegúrate de que el path es correcto
       });
-    });
+      server.io = io;
+
+      io.on("connection", (socket) => {
+        console.log("New client connected", socket.id);
+
+        socket.on("disconnect", () => {
+          console.log("Client disconnected", socket.id);
+        });
+      });
+    }
   }
+
   res.end();
 }
