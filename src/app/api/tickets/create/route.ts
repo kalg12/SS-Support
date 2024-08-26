@@ -1,4 +1,3 @@
-// src/app/api/tickets/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
 import { getSocketServerInstance } from "@/lib/socket";

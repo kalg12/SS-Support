@@ -1,14 +1,14 @@
-// src/lib/socket.ts
-import { Server as HTTPServer } from "http";
 import { Server as IOServer } from "socket.io";
 
 let io: IOServer | undefined;
 
-export const initializeSocket = (server: HTTPServer) => {
+export const initializeSocket = (server: any) => {
   if (!io) {
-    io = new IOServer(server);
+    io = new IOServer(server, {
+      path: "/api/socket",
+    });
     io.on("connection", (socket) => {
-      console.log("New socket connection", socket.id);
+      console.log("New client connected", socket.id);
     });
   }
   return io;

@@ -1,8 +1,6 @@
-// src/components/NotificationProvider.tsx
 "use client";
 
 import React, { useEffect } from "react";
-import { io } from "socket.io-client";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch } from "@/store";
 import { selectToken } from "@/store/authSlice";
@@ -10,65 +8,44 @@ import {
   fetchNotifications,
   selectNotifications,
   markNotificationAsRead,
-  Notification as AppNotification,
 } from "@/store/notificationSlice";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const socket = io(); // Conexión al servidor Socket.IO en la misma URL
-
 const NotificationProvider = () => {
-  const token = useSelector(selectToken);
+  const token = useSelector(selectToken) || ""; // Asegura que token siempre sea un string
   const notifications = useSelector(selectNotifications);
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    socket.on("new-ticket", (data) => {
-      toast.info(data.message, {
-        autoClose: 5000,
-        position: "top-right",
-        closeOnClick: true,
-      });
+    const fetchAndNotify = async () => {
+      if (token) {
+        await dispatch(fetchNotifications(token));
+        notifications.forEach((notification) => {
+          if (!notification.leido) {
+            toast.info(notification.mensaje, {
+              autoClose: 5000,
+              position: "top-right",
+              closeOnClick: true,
+            });
 
-      if (Notification.permission === "granted") {
-        new Notification("Nueva notificación", {
-          body: data.message,
+            if (Notification.permission === "granted") {
+              new Notification("Nueva notificación", {
+                body: notification.mensaje,
+              });
+            }
+
+            dispatch(markNotificationAsRead({ id: notification.id, token }));
+          }
         });
       }
-    });
-
-    return () => {
-      socket.off("new-ticket");
     };
-  }, []);
 
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchNotifications(token));
-    }
-  }, [token, dispatch]);
+    // Polling every 30 seconds to check for new notifications
+    const intervalId = setInterval(fetchAndNotify, 30000);
 
-  useEffect(() => {
-    if (notifications && notifications.length > 0 && token) {
-      notifications.forEach((notification: AppNotification) => {
-        if (!notification.leido) {
-          dispatch(markNotificationAsRead({ id: notification.id, token }));
-        }
-      });
-    }
-  }, [notifications, dispatch, token]);
-
-  useEffect(() => {
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then((permission) => {
-        if (permission !== "granted") {
-          console.warn(
-            "Las notificaciones del navegador están deshabilitadas."
-          );
-        }
-      });
-    }
-  }, []);
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, [token, dispatch, notifications]);
 
   return <ToastContainer />;
 };

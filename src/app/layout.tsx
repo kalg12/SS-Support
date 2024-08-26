@@ -1,5 +1,3 @@
-"use client";
-import { useEffect } from "react";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/providers";
@@ -11,10 +9,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    fetch("/api/socket");
-  }, []);
-
   return (
     <html lang="es">
       <body className={inter.className}>
