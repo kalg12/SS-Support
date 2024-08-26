@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/utils/db";
-import { getSocketServerInstance } from "@/lib/socket";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +13,7 @@ export async function POST(request: NextRequest) {
       horario_agendado,
     } = await request.json();
 
+    // Validación de todos los campos requeridos
     if (
       !nombre ||
       !apellido ||
@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
     await connection.beginTransaction();
 
     try {
+      // Insertar el estudiante
       const [estudianteResult]: any = await connection.query(
         "INSERT INTO estudiantes (nombre, apellido, grupo, semestre, telefono_whatsapp) VALUES (?, ?, ?, ?, ?)",
         [nombre, apellido, grupo, semestre, telefono_whatsapp]
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
 
       const estudianteId = estudianteResult.insertId;
 
+      // Insertar el ticket
       const [ticketResult]: any = await connection.query(
         "INSERT INTO tickets (estudiante_id, descripcion, estado, fecha_creacion, fecha_actualizacion, horario_agendado) VALUES (?, ?, ?, ?, ?, ?)",
         [
@@ -59,13 +61,11 @@ export async function POST(request: NextRequest) {
       await connection.commit();
 
       if (ticketResult.affectedRows > 0) {
-        const io = getSocketServerInstance();
-        io.emit("new-ticket", {
-          message: `Nuevo ticket creado por ${nombre} ${apellido}`,
-          ticketId: ticketResult.insertId,
+        return NextResponse.json({
+          success: true,
+          message:
+            "Gracias por enviar tu solicitud. Esperamos poder asistirte pronto.",
         });
-
-        return NextResponse.json({ success: true });
       } else {
         await connection.rollback();
         return NextResponse.json(
