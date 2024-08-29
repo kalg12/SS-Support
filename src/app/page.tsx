@@ -17,10 +17,5 @@ export default function Home() {
     }
   }, [isAuthenticated, router]);
 
-  return (
-    <>
-      {!isAuthenticated && <Login />}
-      {isAuthenticated && <NotificationList />}
-    </>
-  );
+  return <>{!isAuthenticated && <Login />}</>;
 }

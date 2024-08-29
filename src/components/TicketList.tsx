@@ -31,41 +31,69 @@ interface Ticket {
 
 const TicketList = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [lastTicketId, setLastTicketId] = useState<number | null>(null);
   const token = useSelector(selectToken);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTickets = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/tickets/list");
-        const data = await response.json();
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/tickets/list");
+      const data = await response.json();
 
-        if (data.success) {
-          setTickets(data.tickets);
-        } else {
-          Swal.fire({
-            title: "Error",
-            text: data.message,
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+      if (data.success) {
+        setTickets(data.tickets);
+
+        // Verificar si hay un nuevo ticket
+        if (data.tickets.length > 0 && lastTicketId !== null) {
+          const latestTicket = data.tickets[data.tickets.length - 1];
+          if (latestTicket.id !== lastTicketId) {
+            // Mostrar notificación si hay un nuevo ticket
+            if (Notification.permission === "granted") {
+              new Notification("Nuevo Ticket", {
+                body: `Ticket creado por ${latestTicket.nombre} ${latestTicket.apellido}`,
+              });
+            } else {
+              Swal.fire({
+                title: "Nuevo Ticket",
+                text: `Ticket creado por ${latestTicket.nombre} ${latestTicket.apellido}`,
+                icon: "info",
+                confirmButtonText: "OK",
+              });
+            }
+            setLastTicketId(latestTicket.id); // Actualizar el último ID de ticket conocido
+          }
+        } else if (data.tickets.length > 0) {
+          // Inicializar el lastTicketId si es la primera vez que se carga la lista
+          setLastTicketId(data.tickets[data.tickets.length - 1].id);
         }
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
+      } else {
         Swal.fire({
           title: "Error",
-          text: "An error occurred while fetching the tickets",
+          text: data.message,
           icon: "error",
           confirmButtonText: "OK",
         });
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while fetching the tickets",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchTickets();
-  }, []);
+  useEffect(() => {
+    fetchTickets(); // Cargar los tickets al montar el componente
+    const intervalId = setInterval(fetchTickets, 10000); // Verificar cada 10 segundos
+
+    return () => clearInterval(intervalId); // Limpiar el intervalo cuando el componente se desmonte
+  });
 
   const handleStatusChange = async (id: number, newStatus: string) => {
     try {
@@ -81,17 +109,13 @@ const TicketList = () => {
       const data = await response.json();
 
       if (data.success) {
-        setTickets((prevTickets) =>
-          prevTickets.map((ticket) =>
-            ticket.id === id ? { ...ticket, estado: newStatus } : ticket
-          )
-        );
         Swal.fire({
           title: "Success",
           text: "Ticket updated successfully!",
           icon: "success",
           confirmButtonText: "OK",
         });
+        fetchTickets(); // Refresca la lista de tickets después de actualizar el estado
       } else {
         Swal.fire({
           title: "Error",

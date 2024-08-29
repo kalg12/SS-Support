@@ -42,7 +42,7 @@ const NotificationProvider = () => {
     };
 
     // Polling every 30 seconds to check for new notifications
-    const intervalId = setInterval(fetchAndNotify, 30000);
+    const intervalId = setInterval(fetchAndNotify, 300000);
 
     return () => clearInterval(intervalId); // Cleanup on component unmount
   }, [token, dispatch, notifications]);
